@@ -8,6 +8,7 @@ import RequestValidator from './request-validator'
 //import DbManager from './dbManager'
 
 import dotenv from 'dotenv'
+import { BigNumberish, BytesLike } from 'ethers'
 dotenv.config();
 
 // Set up the express app
@@ -29,6 +30,11 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(router)
 
 //DbManager.ensureDb(process.env.DB_DOC_NAME)
+
+/**
+ * EndPoints for APIs
+ */
+app.get('/', (req, res) => res.send('Welcome to Verida-DID-Registry API!'));
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
 app.listen(PORT, () => {
