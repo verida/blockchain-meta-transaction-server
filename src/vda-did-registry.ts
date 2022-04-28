@@ -15,7 +15,7 @@ import {
 import { stringToBytes32, attributeToHex } from './helpers'
 
 import Web3 from 'web3'
-import { BigNumberish } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 
 const ControllerContract = require('../artifacts/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json')
 
@@ -37,6 +37,38 @@ const controller = new web3.eth.Contract(ControllerContract.abi, address)
 type Bytes = ArrayLike<number>;
 
 type BytesLike = Bytes | string;
+
+type DelegateParam = {
+  delegateType: BytesLike;
+  delegate: string;
+  validity?: BigNumberish;
+};
+
+type AttributeParam = {
+  name: BytesLike;
+  value: BytesLike;
+  validity?: BigNumberish;
+}
+
+type SignedDelegateParam = {
+  identity: string;
+  sigV: BigNumberish;
+  sigR: BytesLike;
+  sigS: BytesLike;
+  delegateType: BytesLike;
+  delegate: string;
+  validity?: BigNumberish;
+}
+
+type SignedAttributeParam = {
+  identity: string;
+  sigV: BigNumberish;
+  sigR: BytesLike;
+  sigS: BytesLike;
+  delegateType: BytesLike;
+  delegate: string;
+  validity?: BigNumberish;
+}
 
 async function identityOwner(identity: string) {
   let ret = await controller.methods.identityOwner(identity).call()
@@ -129,6 +161,206 @@ async function addDelegate(
   }
 }
 
+async function addDelegateSigned(
+  identity: string,
+  sigV: BigNumberish,
+  sigR: BytesLike,
+  sigS: BytesLike,
+  delegateType: BytesLike,
+  delegate: string,
+  validity: BigNumberish,
+) {
+  try {
+    const tx = controller.methods.addDelegateSigned(
+      identity,
+      sigV,
+      sigR,
+      sigS,
+      delegateType,
+      delegate,
+      validity
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
+async function revokeDelegate(
+  identity: string,
+  delegateType: BytesLike,
+  delegate: string,
+) {
+  try {
+    const tx = controller.methods.revokeDelegate(
+      identity,
+      delegateType,
+      delegate,
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
+async function revokeDelegateSigned(
+  identity: string,
+  sigV: BigNumberish,
+  sigR: BytesLike,
+  sigS: BytesLike,
+  delegateType: BytesLike,
+  delegate: string,
+) {
+  try {
+    const tx = controller.methods.revokeDelegateSigned(
+      identity,
+      sigV,
+      sigR,
+      sigS,
+      delegateType,
+      delegate,
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
+async function setAttribute(
+  identity: string,
+  name: BytesLike,
+  value: BytesLike,
+  validity: BigNumberish
+) {
+  try {
+    const tx = controller.methods.setAttribute(
+      identity,
+      name,
+      value,
+      validity
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
+async function setAttributeSigned(
+  identity: string,
+  sigV: BigNumberish,
+  sigR: BytesLike,
+  sigS: BytesLike,
+  name: BytesLike,
+  value: BytesLike,
+  validity: BigNumberish
+) {
+  try {
+    const tx = controller.methods.setAttributeSigned(
+      identity,
+      sigV,
+      sigR,
+      sigS,
+      name,
+      value,
+      validity
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
+async function revokeAttribute(
+  identity: string,
+  name: BytesLike,
+  value: BytesLike,
+) {
+  try {
+    const tx = controller.methods.revokeAttribute(
+      identity,
+      name,
+      value,
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
+async function revokeAttributeSigned(
+  identity: string,
+  sigV: BigNumberish,
+  sigR: BytesLike,
+  sigS: BytesLike,
+  name: BytesLike,
+  value: BytesLike,
+) {
+  try {
+    const tx = controller.methods.revokeAttributeSigned(
+      identity,
+      sigV,
+      sigR,
+      sigS,
+      name,
+      value,
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
+async function bulkAdd(
+  identity: string,
+  delegateParams: DelegateParam[],
+  attributeParams: AttributeParam[],
+  signedDelegateParams: SignedDelegateParam[],
+  signedAttributeParams: SignedAttributeParam[],
+) {
+  try {
+    const tx = controller.methods.bulkAdd(
+      identity,
+      delegateParams,
+      attributeParams,
+      signedDelegateParams,
+      signedAttributeParams,
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
+async function bulkRevoke(
+  identity: string,
+  delegateParams: DelegateParam[],
+  attributeParams: AttributeParam[],
+  signedDelegateParams: SignedDelegateParam[],
+  signedAttributeParams: SignedAttributeParam[],
+) {
+  try {
+    const tx = controller.methods.bulkRevoke(
+      identity,
+      delegateParams,
+      attributeParams,
+      signedDelegateParams,
+      signedAttributeParams,
+    )
+    return await runSendTransction(tx)
+  } catch (e) {
+    console.log('Error occured : ', e)
+    return { success: false, error: e }
+  }
+}
+
 // Setting Routes
 const didRegistryRouter = Router();
 
@@ -165,13 +397,104 @@ didRegistryRouter.get('/changeOwnerSigned', async (req, res) => {
   res.send(ret)
   })
 
-didRegistryRouter.get('/changeOwnerSigned', async (req, res) => {
+didRegistryRouter.get('/addDelegate', async (req, res) => {
+  let identity  = req.query.identity as string
+  let delegateType = req.query.delegateType as BytesLike
+  let delegate = req.query.delegate as string
+  let validity = req.query.validity as BigNumberish
+  let ret = await addDelegate(identity, delegateType, delegate, validity)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/addDelegateSigned', async (req, res) => {
   let identity  = req.query.identity as string
   let sigV = req.query.sigV as BigNumberish
   let sigR = req.query.sigR as BytesLike
   let sigS = req.query.sigS as BytesLike
-  let newOwner = req.query.newOwner as string
-  let ret = await changeOwnerSigned(identity, sigV, sigR, sigS, newOwner)
+  let delegateType = req.query.delegateType as BytesLike
+  let delegate = req.query.delegate as string
+  let validity = req.query.validity as BigNumberish
+  let ret = await addDelegateSigned(identity, sigV, sigR, sigS, delegateType, delegate, validity)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/revokeDelegate', async (req, res) => {
+  let identity  = req.query.identity as string
+  let delegateType = req.query.delegateType as BytesLike
+  let delegate = req.query.delegate as string
+  let ret = await revokeDelegate(identity, delegateType, delegate)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/revokeDelegateSigned', async (req, res) => {
+  let identity  = req.query.identity as string
+  let sigV = req.query.sigV as BigNumberish
+  let sigR = req.query.sigR as BytesLike
+  let sigS = req.query.sigS as BytesLike
+  let delegateType = req.query.delegateType as BytesLike
+  let delegate = req.query.delegate as string
+  let ret = await revokeDelegateSigned(identity, sigV, sigR, sigS, delegateType, delegate)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/setAttribute', async (req, res) => {
+  let identity  = req.query.identity as string
+  let name = req.query.delegateType as BytesLike
+  let value = req.query.delegate as BytesLike
+  let validity = req.query.delegate as BigNumberish
+  let ret = await setAttribute(identity, name, value, validity)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/setAttributeSigned', async (req, res) => {
+  let identity  = req.query.identity as string
+  let sigV = req.query.sigV as BigNumberish
+  let sigR = req.query.sigR as BytesLike
+  let sigS = req.query.sigS as BytesLike
+  let name = req.query.delegateType as BytesLike
+  let value = req.query.delegate as BytesLike
+  let validity = req.query.delegate as BigNumberish
+  let ret = await setAttributeSigned(identity, sigV, sigR, sigS, name, value, validity)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/revokeAttribute', async (req, res) => {
+  let identity  = req.query.identity as string
+  let name = req.query.delegateType as BytesLike
+  let value = req.query.delegate as BytesLike
+  let ret = await revokeAttribute(identity, name, value)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/revokeAttributeSigned', async (req, res) => {
+  let identity  = req.query.identity as string
+  let sigV = req.query.sigV as BigNumberish
+  let sigR = req.query.sigR as BytesLike
+  let sigS = req.query.sigS as BytesLike
+  let name = req.query.delegateType as BytesLike
+  let value = req.query.delegate as BytesLike
+  let validity = req.query.delegate as BigNumberish
+  let ret = await revokeAttributeSigned(identity, sigV, sigR, sigS, name, value)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/bulkAdd', async (req, res) => {
+  let identity  = req.query.identity as string
+  let delegateParams = req.query.delegateParams as DelegateParam[]
+  let attributeParams = req.query.attributeParams as AttributeParam[]
+  let signedDelegateParams = req.query.signedDelegateParams as SignedDelegateParam[]
+  let signedAttributeParams = req.query.signedAttributeParams as SignedAttributeParam[]
+  let ret = await bulkAdd(identity, delegateParams, attributeParams, signedDelegateParams, signedAttributeParams)
+  res.send(ret)
+  })
+
+didRegistryRouter.get('/bulkRevoke', async (req, res) => {
+  let identity  = req.query.identity as string
+  let delegateParams = req.query.delegateParams as DelegateParam[]
+  let attributeParams = req.query.attributeParams as AttributeParam[]
+  let signedDelegateParams = req.query.signedDelegateParams as SignedDelegateParam[]
+  let signedAttributeParams = req.query.signedAttributeParams as SignedAttributeParam[]
+  let ret = await bulkRevoke(identity, delegateParams, attributeParams, signedDelegateParams, signedAttributeParams)
   res.send(ret)
   })
 
