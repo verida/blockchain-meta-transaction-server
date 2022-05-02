@@ -33,6 +33,9 @@ const { privateKey } = require('../.evn.json')
 const { address: admin } = web3.eth.accounts.wallet.add(privateKey)
 const controller = new web3.eth.Contract(ControllerContract.abi, address)
 
+// Test Purpose
+console.log("Wallet Address :", admin)
+
 // Define Types
 type Bytes = ArrayLike<number>;
 
@@ -365,11 +368,16 @@ async function bulkRevoke(
 const didRegistryRouter = Router();
 
 didRegistryRouter.get('/identityOwner', async (req, res) => {
-  //  console.log("Query = ", req.query)
-  let identity  = req.query.identity as string;
-  //  let owner = await identityOwner('0x713A5Db664297195061b9558f40e88434cb79C77')
-  let owner = await identityOwner(identity)
-    res.send(owner)
+  try {
+    //  console.log("Query = ", req.query)
+    let identity  = req.query.identity as string;
+    //  let owner = await identityOwner('0x713A5Db664297195061b9558f40e88434cb79C77')
+    let owner = await identityOwner(identity)
+    res.send({success:true, owner:owner})  
+  } catch (e) {
+    res.send({success: false, error: 'Invalid argument'})
+  }
+  
   })
 
 didRegistryRouter.get('/validDelegate', async (req, res) => {
