@@ -9,7 +9,7 @@
     "prestart": "yarn build",
     "start": "node dist/server.js",
     "tests": "ts-mocha './tests/**/*.ts'",
-    "test": "ts-mocha"
+    "test": "ts-mocha --timeout 100000"
   },
   "repository": {
     "type": "git",
