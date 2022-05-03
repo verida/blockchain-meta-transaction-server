@@ -58,8 +58,9 @@ type AttributeParam = {
   validity?: BigNumberish;
 }
 
-async function identityOwner(identity: string) {
+async function identityOwner(reqData: any) {
   try {
+    const {identity} = reqData
     const ret = await controller.methods.identityOwner(identity).call()
     return { success:true, data:ret }
   } catch (e) {
@@ -67,8 +68,9 @@ async function identityOwner(identity: string) {
   }
 }
 
-async function validDelegate(identity: string, delegateType: BytesLike, delegate: String) {
+async function validDelegate(reqData : any) {
   try {
+    const {identity, delegateType, delegate} = reqData
     const ret  = await controller.methods.validDelegate(identity, delegateType, delegate).call();   
     return { success:true, data:ret }
   } catch (e) {
@@ -102,11 +104,9 @@ async function runSendTransction(tx: any) {
   }
 }
 
-async function changeOwner(
-  identity: string, 
-  newOwner: string,
-  signature: BytesLike) {
+async function changeOwner(reqData: any) {
   try {
+    const {identity, newOwner, signature} = reqData
     const tx = controller.methods.changeOwner(
       identity,
       newOwner,
@@ -120,14 +120,9 @@ async function changeOwner(
   }
 }
 
-async function addDelegate(
-  identity: string,
-  delegateType: BytesLike,
-  delegate: string,
-  validity: BigNumberish,
-  signature: BytesLike
-) {
+async function addDelegate(reqData: any) {
   try {
+    const {identity, delegateType, delegate, validity, signature} = reqData
     const tx = controller.methods.addDelegate(
       identity,
       delegateType,
@@ -142,13 +137,9 @@ async function addDelegate(
   }
 }
 
-async function revokeDelegate(
-  identity: string,
-  delegateType: BytesLike,
-  delegate: string,
-  signature: BytesLike
-) {
+async function revokeDelegate(reqData: any) {
   try {
+    const {identity, delegateType, delegate, signature} = reqData
     const tx = controller.methods.revokeDelegate(
       identity,
       delegateType,
@@ -162,14 +153,9 @@ async function revokeDelegate(
   }
 }
 
-async function setAttribute(
-  identity: string,
-  name: BytesLike,
-  value: BytesLike,
-  validity: BigNumberish,
-  signature: BytesLike
-) {
+async function setAttribute(reqData: any) {
   try {
+    const {identity, name, value, validity, signature} = reqData
     const tx = controller.methods.setAttribute(
       identity,
       name,
@@ -185,13 +171,9 @@ async function setAttribute(
   }
 }
 
-async function revokeAttribute(
-  identity: string,
-  name: BytesLike,
-  value: BytesLike,
-  signature: BytesLike
-) {
+async function revokeAttribute(reqData: any) {
   try {
+    const {identity, name, value, signature} = reqData
     const tx = controller.methods.revokeAttribute(
       identity,
       name,
@@ -205,17 +187,15 @@ async function revokeAttribute(
   }
 }
 
-async function bulkAdd(
-  identity: string,
-  delegateParams: DelegateParam[],
-  attributeParams: AttributeParam[],
-  signature: BytesLike
-) {
+async function bulkAdd(reqData: any) {
   try {
+    const {identity, delegateParams, attributeParams, signature} = reqData
+    const dParams = JSON.parse(delegateParams as string) as DelegateParam[]
+    const aParams = JSON.parse(attributeParams as string) as AttributeParam[]
     const tx = controller.methods.bulkAdd(
       identity,
-      delegateParams,
-      attributeParams,
+      dParams,
+      aParams,
       signature
     )
     return await runSendTransction(tx)
@@ -225,17 +205,15 @@ async function bulkAdd(
   }
 }
 
-async function bulkRevoke(
-  identity: string,
-  delegateParams: DelegateParam[],
-  attributeParams: AttributeParam[],
-  signature: BytesLike
-) {
+async function bulkRevoke(reqData: any) {
   try {
+    const {identity, delegateParams, attributeParams, signature} = reqData
+    const dParams = JSON.parse(delegateParams as string) as DelegateParam[]
+    const aParams = JSON.parse(attributeParams as string) as AttributeParam[]
     const tx = controller.methods.bulkRevoke(
       identity,
-      delegateParams,
-      attributeParams,
+      dParams,
+      aParams,
       signature
     )
     return await runSendTransction(tx)
@@ -249,127 +227,39 @@ async function bulkRevoke(
 const didRegistryRouter = Router();
 
 didRegistryRouter.get('/identityOwner', async (req, res) => {
-  try {
-    //  console.log("Query = ", req.query)
-    const identity  = req.query.identity as string;
-    const ret = await identityOwner(identity)
-    res.send(ret)  
-  } catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }
-  
-  })
+  res.send(await identityOwner(req.query))  
+  })  
 
 didRegistryRouter.get('/validDelegate', async (req, res) => {
-  try {
-    const {identity, delegateType, delegate} = req.query
-
-    const ret = await validDelegate(identity as string, delegateType as BytesLike, delegate as string)
-    res.send(ret)
-  } catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }
+  res.send(await validDelegate(req.query))
   })
 
 didRegistryRouter.get('/changeOwner', async (req, res) => {
-  try {
-    const {identity, newOwner, signature} = req.query
-    const ret = await changeOwner(
-      identity as string, 
-      newOwner as string, 
-      signature as BytesLike)
-    res.send(ret)
-  } catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }
+  res.send(await changeOwner(req.query))
   })
 
 didRegistryRouter.get('/addDelegate', async (req, res) => {
-  try {
-    const {identity, delegateType, delegate, validity, signature} = req.query
-    const ret = await addDelegate(
-      identity as string, 
-      delegateType as BytesLike, 
-      delegate as string, 
-      validity as BigNumberish, 
-      signature as BytesLike)
-    res.send(ret)
-  } catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }
+  res.send(await addDelegate(req.query))
   })
 
 didRegistryRouter.get('/revokeDelegate', async (req, res) => {
-  try {
-    const {identity, delegateType, delegate, signature} = req.query
-    const ret = await revokeDelegate(
-      identity as string, 
-      delegateType as BytesLike, 
-      delegate as string, 
-      signature as BytesLike)
-    res.send(ret)
-  } catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }
+  res.send(await revokeDelegate(req.query))
   })
 
 didRegistryRouter.get('/setAttribute', async (req, res) => {
-  try {
-    const {identity, name, value, validity, signature} = req.query
-    const ret = await setAttribute(
-      identity as string,
-      name as BytesLike,
-      value as BytesLike,
-      validity as BigNumberish,
-      signature as BytesLike)
-    res.send(ret)
-  } catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }  
+  res.send(await setAttribute(req.query))
   })
 
 didRegistryRouter.get('/revokeAttribute', async (req, res) => {
-  try {
-    const {identity, name, value, signature} = req.query
-    const ret = await revokeAttribute(
-      identity as string,
-      name as BytesLike,
-      value as BytesLike,
-      signature as BytesLike)
-    res.send(ret)
-  }  catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }
+  res.send(await revokeAttribute(req.query))
   })
 
 didRegistryRouter.get('/bulkAdd', async (req, res) => {
-  try {
-    const {identity, delegateParams, attributeParams, signature} = req.query
-    const ret = await bulkAdd(
-      identity as string,
-      JSON.parse(delegateParams as string) as DelegateParam[],
-      JSON.parse(attributeParams as string) as AttributeParam[],
-      signature as BytesLike
-    )
-    res.send(ret)
-  } catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }  
+  res.send(await bulkAdd(req.query))
   })
 
 didRegistryRouter.get('/bulkRevoke', async (req, res) => {
-  try {
-    const {identity, delegateParams, attributeParams, signature} = req.query
-    const ret = await bulkRevoke(
-      identity as string,
-      JSON.parse(delegateParams as string) as DelegateParam[],
-      JSON.parse(attributeParams as string) as AttributeParam[],
-      signature as BytesLike
-    )
-    res.send(ret)
-  } catch (e) {
-    res.send({success:false, error:'Invalid argument'})
-  }
+  res.send(await bulkRevoke(req.query))
   })
 
 export default didRegistryRouter;

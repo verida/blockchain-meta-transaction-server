@@ -195,7 +195,6 @@ describe("Generic Server Tests", function() {
     //     })
     // })
 
-    /*
     describe("changeOwner()",async () => {
         describe("Correct Signature", async () => {
             it("Change Success", async () => {                
@@ -424,7 +423,6 @@ describe("Generic Server Tests", function() {
             })
         })
     })
-    */
     
 
     describe("bulkAdd()",async () => {
@@ -591,7 +589,7 @@ describe("Generic Server Tests", function() {
             })
 
             it("validity of delegates should be false",async () => {
-                // await sleep(2000)
+                await sleep(1000)
                 await checkValidDelegate(
                     identity,
                     formatBytes32String("bulktest-1"),
