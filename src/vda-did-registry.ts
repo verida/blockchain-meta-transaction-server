@@ -226,6 +226,7 @@ async function bulkRevoke(reqData: any) {
 // Setting Routes
 const didRegistryRouter = Router();
 
+// Get End Points
 didRegistryRouter.get('/identityOwner', async (req, res) => {
   res.send(await identityOwner(req.query))  
   })  
@@ -260,6 +261,43 @@ didRegistryRouter.get('/bulkAdd', async (req, res) => {
 
 didRegistryRouter.get('/bulkRevoke', async (req, res) => {
   res.send(await bulkRevoke(req.query))
+  })
+
+// Post EndPoints
+didRegistryRouter.post('/identityOwner', async (req, res) => {
+  res.send(await identityOwner(req.body))  
+  })  
+
+didRegistryRouter.post('/validDelegate', async (req, res) => {
+  res.send(await validDelegate(req.body))
+  })
+
+didRegistryRouter.post('/changeOwner', async (req, res) => {
+  res.send(await changeOwner(req.body))
+  })
+
+didRegistryRouter.post('/addDelegate', async (req, res) => {
+  res.send(await addDelegate(req.body))
+  })
+
+didRegistryRouter.post('/revokeDelegate', async (req, res) => {
+  res.send(await revokeDelegate(req.body))
+  })
+
+didRegistryRouter.post('/setAttribute', async (req, res) => {
+  res.send(await setAttribute(req.body))
+  })
+
+didRegistryRouter.post('/revokeAttribute', async (req, res) => {
+  res.send(await revokeAttribute(req.body))
+  })
+
+didRegistryRouter.post('/bulkAdd', async (req, res) => {
+  res.send(await bulkAdd(req.body))
+  })
+
+didRegistryRouter.post('/bulkRevoke', async (req, res) => {
+  res.send(await bulkRevoke(req.body))
   })
 
 export default didRegistryRouter;

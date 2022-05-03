@@ -103,6 +103,33 @@ const checkValidDelegate = async(identity:String, delegateType:string, delegate:
     assert.equal(response.data.data, result, 'Is valid Delegate')   
 }
 
+const checkOwnerPOST = async (identity:String, owner: string) => {
+    const response: any = await server.post(
+        SERVER_URL + 
+        "/identityOwner",
+        {
+            identity: identity
+        }
+        )
+    // console.log("Response", response)
+
+    assert.equal(response.data.success, true, 'Have a success response')
+    assert.equal(response.data.data, owner, 'Correct Owner')
+}
+
+const checkValidDelegatePOST = async(identity:String, delegateType:string, delegate:string, result:boolean) => {
+    const response: any = await server.post(
+        SERVER_URL + "/validDelegate",
+        {
+            identity: identity,
+            delegateType: delegateType,
+            delegate: delegate
+        })
+    assert.ok(response && response.data, 'Have a response')
+    assert.equal(response.data.success, true, 'Have a success response')
+    assert.equal(response.data.data, result, 'Is valid Delegate')   
+}
+
 function sleep(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -182,157 +209,75 @@ describe("Generic Server Tests", function() {
         })
     });
 
-    // describe("identityOwner()",async () => {
-    //     it("Success", async () => {
-    //         const response: any = await server.get(
-    //             SERVER_URL + 
-    //             "/identityOwner?identity=" + identity
-    //             )
-    //         // console.log("Response", response)
+    describe("Http GET requests test",async () => {
+        // describe("identityOwner()",async () => {
+        //     it("Success", async () => {
+        //         const response: any = await server.get(
+        //             SERVER_URL + 
+        //             "/identityOwner?identity=" + identity
+        //             )
+        //         // console.log("Response", response)
 
-    //         assert.equal(response.data.success, true, 'Have a success response')
-    //         assert.equal(response.data.data, identity, 'Owner itself')
-    //     })
-    // })
+        //         assert.equal(response.data.success, true, 'Have a success response')
+        //         assert.equal(response.data.data, identity, 'Owner itself')
+        //     })
+        // })
 
-    describe("changeOwner()",async () => {
-        describe("Correct Signature", async () => {
-            it("Change Success", async () => {                
-                const response: any = await server.get(
-                    SERVER_URL + "/changeOwner?"
-                    + `identity=${identity}&`
-                    + `newOwner=${delegate}&`
-                    + `signature=${testSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')
-    
-                // console.log("Response", response)
-    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
+        describe("changeOwner()",async () => {
+            describe("Correct Signature", async () => {
+                it("Change Success", async () => {                
+                    const response: any = await server.get(
+                        SERVER_URL + "/changeOwner?"
+                        + `identity=${identity}&`
+                        + `newOwner=${delegate}&`
+                        + `signature=${testSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
 
-            it("Identity Changed correctly", async () => {
-                await sleep(2000)
-                await checkOwner(identity, delegate)
-            })
+                it("Identity Changed correctly", async () => {
+                    await sleep(2000)
+                    await checkOwner(identity, delegate)
+                })
 
-            it("Restore owner of identity for another test", async () => {
-                await sleep(3000)
-                const response: any = await server.get(
-                    SERVER_URL + "/changeOwner?"
-                    + `identity=${identity}&`
-                    + `newOwner=${identity}&`
-                    + `signature=${testSignature}`
-                    )
-                // console.log("Response", response)
-                assert.ok(response && response.data, 'Have a response')   
-                assert.equal(response.data.success, true, 'Have a success response')
-                await checkOwner(identity, identity)
-            })
-        });
+                it("Restore owner of identity for another test", async () => {
+                    await sleep(3000)
+                    const response: any = await server.get(
+                        SERVER_URL + "/changeOwner?"
+                        + `identity=${identity}&`
+                        + `newOwner=${identity}&`
+                        + `signature=${testSignature}`
+                        )
+                    // console.log("Response", response)
+                    assert.ok(response && response.data, 'Have a response')   
+                    assert.equal(response.data.success, true, 'Have a success response')
+                    await checkOwner(identity, identity)
+                })
+            });
 
-        describe("Bad Signature", async () => {
-            it("Should Fail", async () => {                
-                const response: any = await server.get(
-                    SERVER_URL + "/changeOwner?"
-                    + `identity=${identity}&`
-                    + `newOwner=${delegate}&`
-                    + `signature=${badSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')
-    
-                // console.log("Response", response)
-    
-                assert.equal(response.data.success, false, 'Have a success response')
-            })
-        });
-    })
-    
-    describe("addDelegate()", async() => {
-        it("validDelegate should be false", async () => {
-            await checkValidDelegate(
-                identity,
-                delegateType,
-                delegate3,
-                false
-                )
+            describe("Bad Signature", async () => {
+                it("Should Fail", async () => {                
+                    const response: any = await server.get(
+                        SERVER_URL + "/changeOwner?"
+                        + `identity=${identity}&`
+                        + `newOwner=${delegate}&`
+                        + `signature=${badSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, false, 'Have a success response')
+                })
+            });
         })
-
-        describe("Correct Signature", async() => {
-            it("delegate added successfully", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/addDelegate?"
-                    + `identity=${identity}&`
-                    + `delegateType=${delegateType}&`
-                    + `delegate=${delegate3}&`
-                    + `validity=${validity}&`
-                    + `signature=${testSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')
-    
-                // console.log("Response", response)
-    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
-
-            it("validDelegate should be true", async () => {
-                await checkValidDelegate(
-                    identity,
-                    delegateType,
-                    delegate3,
-                    true
-                    )
-            })
-        })
-
-        describe("Bad Signature", async() => {
-            it("should fail", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/addDelegate?"
-                    + `identity=${identity}&`
-                    + `delegateType=${delegateType}&`
-                    + `delegate=${delegate3}&`
-                    + `validity=${validity}&`
-                    + `signature=${badSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')
-    
-                // console.log("Response", response)
-    
-                assert.equal(response.data.success, false, 'Failed to add delegate')
-            })
-        })
-    })
-
-    describe("revokeDelegate()", async() => {
-        it("validDelegate should be true", async () => {
-            await checkValidDelegate(
-                identity,
-                delegateType,
-                delegate3,
-                true
-                )
-        })
-
-        describe("Correct Signature", async() => {
-
-            it("delegate revoke successfully", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/revokeDelegate?"
-                    + `identity=${identity}&`
-                    + `delegateType=${delegateType}&`
-                    + `delegate=${delegate3}&`
-                    + `signature=${testSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')
-    
-                // console.log("RevokeDelegate Response", response)
-    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
-
+        
+        describe("addDelegate()", async() => {
             it("validDelegate should be false", async () => {
-                // await sleep(2000)
                 await checkValidDelegate(
                     identity,
                     delegateType,
@@ -340,270 +285,790 @@ describe("Generic Server Tests", function() {
                     false
                     )
             })
-        })
 
-        describe("Bad Signature", async() => {
-            it("should fail", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/revokeDelegate?"
-                    + `identity=${identity}&`
-                    + `delegateType=${delegateType}&`
-                    + `delegate=${delegate3}&`
-                    + `signature=${badSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')
-    
-                // console.log("Response", response)
-    
-                assert.equal(response.data.success, false, 'Failed to add delegate')
+            describe("Correct Signature", async() => {
+                it("delegate added successfully", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/addDelegate?"
+                        + `identity=${identity}&`
+                        + `delegateType=${delegateType}&`
+                        + `delegate=${delegate3}&`
+                        + `validity=${validity}&`
+                        + `signature=${testSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("validDelegate should be true", async () => {
+                    await sleep(1000)
+                    await checkValidDelegate(
+                        identity,
+                        delegateType,
+                        delegate3,
+                        true
+                        )
+                })
             })
-        })
-    })
-    
-    describe("setAttribute()", async () => {
-        describe("Correct Signature", async() => {
 
-            it("Set attribute successfully", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/setAttribute?"
-                    + `identity=${identity}&`
-                    + `name=${attributeName}&`
-                    + `value=${attributeValue}&`
-                    + `validity=${validity}&`
-                    + `signature=${testSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
-        })
-
-        describe("Bad Signature", async() => {
-            it("Should fail", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/setAttribute?"
-                    + `identity=${identity}&`
-                    + `name=${attributeName}&`
-                    + `value=${attributeValue}&`
-                    + `validity=${validity}&`
-                    + `signature=${badSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, false, 'Failed to set attribute')
-            })
-        })
-    })
-
-    describe("revokeAttribute()", async () => {
-        describe("Bad Signature", async() => {
-            it("Should fail", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/revokeAttribute?"
-                    + `identity=${identity}&`
-                    + `name=${attributeName}&`
-                    + `value=${attributeValue}&`
-                    + `signature=${badSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, false, 'Failed to revoke attribute')
+            describe("Bad Signature", async() => {
+                it("should fail", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/addDelegate?"
+                        + `identity=${identity}&`
+                        + `delegateType=${delegateType}&`
+                        + `delegate=${delegate3}&`
+                        + `validity=${validity}&`
+                        + `signature=${badSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, false, 'Failed to add delegate')
+                })
             })
         })
 
-        describe("Correct Signature", async() => {
-
-            it("Revoke attribute successfully", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/revokeAttribute?"
-                    + `identity=${identity}&`
-                    + `name=${attributeName}&`
-                    + `value=${attributeValue}&`
-                    + `signature=${testSignature}`
-                    )
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
-        })
-    })
-    
-
-    describe("bulkAdd()",async () => {
-        it("validity of delegates should be false",async () => {
-            await checkValidDelegate(
-                identity,
-                formatBytes32String("bulktest-1"),
-                delegate3,
-                false                
-            )
-
-            await checkValidDelegate(
-                identity,
-                formatBytes32String("bulktest-2"),
-                delegate2,
-                false                
-            )
-        })
-        describe("Correct signature",async () => {
-            it ("Failed because of inavlid arguments", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/bulkAdd?"
-                    + `identity=${identity}&`
-                    + `delegateParams=InvalidArgs&`
-                    + `attributeParams=InvalidArgs&`
-                    + `signature=${testSignature}`
-                    )
-                // console.log("bulkAdd Response:", response)
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, false, 'Failed by invalid arguments')
-            })
-
-            it("bulkAdd success for empty values", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/bulkAdd?"
-                    + `identity=${identity}&`
-                    + `delegateParams=${JSON.stringify([])}&`
-                    + `attributeParams=${JSON.stringify([])}&`
-                    + `signature=${testSignature}`
-                    )
-                // console.log("bulkAdd Response:", response)
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
-
-            it("bulkAdd success", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/bulkAdd?"
-                    + `identity=${identity}&`
-                    + `delegateParams=${JSON.stringify(delegateParams)}&`
-                    + `attributeParams=${JSON.stringify(attributeParams)}&`
-                    + `signature=${testSignature}`
-                    )
-                // console.log("bulkAdd Response:", response)
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
-
-            it("validity of delegates should be true",async () => {
-                // await sleep(2000)
+        describe("revokeDelegate()", async() => {
+            it("validDelegate should be true", async () => {
+                await sleep(1000)
                 await checkValidDelegate(
                     identity,
-                    formatBytes32String("bulktest-1"),
+                    delegateType,
                     delegate3,
                     true
-                )
-    
-                await checkValidDelegate(
-                    identity,
-                    formatBytes32String("bulktest-2"),
-                    delegate2,
-                    true
-                )
+                    )
+            })
+
+            describe("Correct Signature", async() => {
+
+                it("delegate revoke successfully", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/revokeDelegate?"
+                        + `identity=${identity}&`
+                        + `delegateType=${delegateType}&`
+                        + `delegate=${delegate3}&`
+                        + `signature=${testSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("RevokeDelegate Response", response)
+        
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("validDelegate should be false", async () => {
+                    await sleep(1000)
+                    await checkValidDelegate(
+                        identity,
+                        delegateType,
+                        delegate3,
+                        false
+                        )
+                })
+            })
+
+            describe("Bad Signature", async() => {
+                it("should fail", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/revokeDelegate?"
+                        + `identity=${identity}&`
+                        + `delegateType=${delegateType}&`
+                        + `delegate=${delegate3}&`
+                        + `signature=${badSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, false, 'Failed to add delegate')
+                })
+            })
+        })
+        
+        describe("setAttribute()", async () => {
+            describe("Correct Signature", async() => {
+
+                it("Set attribute successfully", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/setAttribute?"
+                        + `identity=${identity}&`
+                        + `name=${attributeName}&`
+                        + `value=${attributeValue}&`
+                        + `validity=${validity}&`
+                        + `signature=${testSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+            })
+
+            describe("Bad Signature", async() => {
+                it("Should fail", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/setAttribute?"
+                        + `identity=${identity}&`
+                        + `name=${attributeName}&`
+                        + `value=${attributeValue}&`
+                        + `validity=${validity}&`
+                        + `signature=${badSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed to set attribute')
+                })
             })
         })
 
-        describe("Bad signature", async() => {
-            it("should fail", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/bulkAdd?"
-                    + `identity=${identity}&`
-                    + `delegateParams=${JSON.stringify(delegateParams)}&`
-                    + `attributeParams=${JSON.stringify(attributeParams)}&`
-                    + `signature=${badSignature}`
-                    )
-                // console.log("bulkAdd Response:", response)
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, false, 'Have a success response')
+        describe("revokeAttribute()", async () => {
+            describe("Bad Signature", async() => {
+                it("Should fail", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/revokeAttribute?"
+                        + `identity=${identity}&`
+                        + `name=${attributeName}&`
+                        + `value=${attributeValue}&`
+                        + `signature=${badSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed to revoke attribute')
+                })
+            })
+
+            describe("Correct Signature", async() => {
+
+                it("Revoke attribute successfully", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/revokeAttribute?"
+                        + `identity=${identity}&`
+                        + `name=${attributeName}&`
+                        + `value=${attributeValue}&`
+                        + `signature=${testSignature}`
+                        )
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
             })
         })
-    })
+        
 
-    describe("bulkRevoke()",async () => {
-        it("validity of delegates should be true",async () => {
-            await checkValidDelegate(
-                identity,
-                formatBytes32String("bulktest-1"),
-                delegate3,
-                true
-            )
-
-            await checkValidDelegate(
-                identity,
-                formatBytes32String("bulktest-2"),
-                delegate2,
-                true
-            )
-        })
-
-        describe("Bad signature", async() => {
-            it("should fail", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/bulkRevoke?"
-                    + `identity=${identity}&`
-                    + `delegateParams=${JSON.stringify(revokeDelegateParams)}&`
-                    + `attributeParams=${JSON.stringify(revokeAttributeParams)}&`
-                    + `signature=${badSignature}`
-                    )
-                // console.log("bulkAdd Response:", response)
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, false, 'Failed by bad signature')
-            })
-        })
-
-        describe("Correct signature",async () => {
-            it ("Failed because of inavlid arguments", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/bulkRevoke?"
-                    + `identity=${identity}&`
-                    + `delegateParams=InvalidArgs&`
-                    + `attributeParams=InvalidArgs&`
-                    + `signature=${testSignature}`
-                    )
-                // console.log("bulkAdd Response:", response)
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, false, 'Failed by invalid arguments')
-            })
-
-            it("bulkRevoke success for empty values", async() => {
-                const response: any = await server.get(
-                    SERVER_URL + "/bulkRevoke?"
-                    + `identity=${identity}&`
-                    + `delegateParams=${JSON.stringify([])}&`
-                    + `attributeParams=${JSON.stringify([])}&`
-                    + `signature=${testSignature}`
-                    )
-                // console.log("bulkAdd Response:", response)
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
-
-            it("bulkRevoke success", async() => {
-                await sleep(1000)
-                const response: any = await server.get(
-                    SERVER_URL + "/bulkRevoke?"
-                    + `identity=${identity}&`
-                    + `delegateParams=${JSON.stringify(revokeDelegateParams)}&`
-                    + `attributeParams=${JSON.stringify(revokeAttributeParams)}&`
-                    + `signature=${testSignature}`
-                    )
-                // console.log("bulkAdd Response:", response)
-                assert.ok(response && response.data, 'Have a response')    
-                assert.equal(response.data.success, true, 'Have a success response')
-            })
-
+        describe("bulkAdd()",async () => {
             it("validity of delegates should be false",async () => {
-                await sleep(1000)
                 await checkValidDelegate(
                     identity,
                     formatBytes32String("bulktest-1"),
                     delegate3,
-                    false
+                    false                
                 )
-    
+
                 await checkValidDelegate(
                     identity,
                     formatBytes32String("bulktest-2"),
                     delegate2,
-                    false
+                    false                
                 )
             })
-        })     
+            describe("Correct signature",async () => {
+                it ("Failed because of inavlid arguments", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/bulkAdd?"
+                        + `identity=${identity}&`
+                        + `delegateParams=InvalidArgs&`
+                        + `attributeParams=InvalidArgs&`
+                        + `signature=${testSignature}`
+                        )
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed by invalid arguments')
+                })
+
+                it("bulkAdd success for empty values", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/bulkAdd?"
+                        + `identity=${identity}&`
+                        + `delegateParams=${JSON.stringify([])}&`
+                        + `attributeParams=${JSON.stringify([])}&`
+                        + `signature=${testSignature}`
+                        )
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("bulkAdd success", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/bulkAdd?"
+                        + `identity=${identity}&`
+                        + `delegateParams=${JSON.stringify(delegateParams)}&`
+                        + `attributeParams=${JSON.stringify(attributeParams)}&`
+                        + `signature=${testSignature}`
+                        )
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("validity of delegates should be true",async () => {
+                    // await sleep(2000)
+                    await checkValidDelegate(
+                        identity,
+                        formatBytes32String("bulktest-1"),
+                        delegate3,
+                        true
+                    )
+        
+                    await checkValidDelegate(
+                        identity,
+                        formatBytes32String("bulktest-2"),
+                        delegate2,
+                        true
+                    )
+                })
+            })
+
+            describe("Bad signature", async() => {
+                it("should fail", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/bulkAdd?"
+                        + `identity=${identity}&`
+                        + `delegateParams=${JSON.stringify(delegateParams)}&`
+                        + `attributeParams=${JSON.stringify(attributeParams)}&`
+                        + `signature=${badSignature}`
+                        )
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Have a success response')
+                })
+            })
+        })
+
+        describe("bulkRevoke()",async () => {
+            it("validity of delegates should be true",async () => {
+                await checkValidDelegate(
+                    identity,
+                    formatBytes32String("bulktest-1"),
+                    delegate3,
+                    true
+                )
+
+                await checkValidDelegate(
+                    identity,
+                    formatBytes32String("bulktest-2"),
+                    delegate2,
+                    true
+                )
+            })
+
+            describe("Bad signature", async() => {
+                it("should fail", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/bulkRevoke?"
+                        + `identity=${identity}&`
+                        + `delegateParams=${JSON.stringify(revokeDelegateParams)}&`
+                        + `attributeParams=${JSON.stringify(revokeAttributeParams)}&`
+                        + `signature=${badSignature}`
+                        )
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed by bad signature')
+                })
+            })
+
+            describe("Correct signature",async () => {
+                it ("Failed because of inavlid arguments", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/bulkRevoke?"
+                        + `identity=${identity}&`
+                        + `delegateParams=InvalidArgs&`
+                        + `attributeParams=InvalidArgs&`
+                        + `signature=${testSignature}`
+                        )
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed by invalid arguments')
+                })
+
+                it("bulkRevoke success for empty values", async() => {
+                    const response: any = await server.get(
+                        SERVER_URL + "/bulkRevoke?"
+                        + `identity=${identity}&`
+                        + `delegateParams=${JSON.stringify([])}&`
+                        + `attributeParams=${JSON.stringify([])}&`
+                        + `signature=${testSignature}`
+                        )
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("bulkRevoke success", async() => {
+                    await sleep(1000)
+                    const response: any = await server.get(
+                        SERVER_URL + "/bulkRevoke?"
+                        + `identity=${identity}&`
+                        + `delegateParams=${JSON.stringify(revokeDelegateParams)}&`
+                        + `attributeParams=${JSON.stringify(revokeAttributeParams)}&`
+                        + `signature=${testSignature}`
+                        )
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("validity of delegates should be false",async () => {
+                    await sleep(1000)
+                    await checkValidDelegate(
+                        identity,
+                        formatBytes32String("bulktest-1"),
+                        delegate3,
+                        false
+                    )
+        
+                    await checkValidDelegate(
+                        identity,
+                        formatBytes32String("bulktest-2"),
+                        delegate2,
+                        false
+                    )
+                })
+            })     
+        })
+    })
+
+    describe("Http POST requests test",async () => {
+        describe("changeOwner()",async () => {
+            describe("Correct Signature", async () => {
+                it("Change Success", async () => {                
+                    const response: any = await server.post(
+                        SERVER_URL + "/changeOwner?", 
+                        {
+                            identity: identity,
+                            newOwner: delegate,
+                            signature: testSignature
+                        }
+                    )
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("Identity Changed correctly", async () => {
+                    await sleep(2000)
+                    await checkOwnerPOST(identity, delegate)
+                })
+
+                it("Restore owner of identity for another test", async () => {
+                    await sleep(3000)
+                    const response: any = await server.post(
+                        SERVER_URL + "/changeOwner?", {
+                        identity: identity,
+                        newOwner: identity,
+                        signature: testSignature 
+                    })
+                    // console.log("Response", response)
+                    assert.ok(response && response.data, 'Have a response')   
+                    assert.equal(response.data.success, true, 'Have a success response')
+                    await checkOwnerPOST(identity, identity)
+                })
+            });
+
+            describe("Bad Signature", async () => {
+                it("Should Fail", async () => {                
+                    const response: any = await server.post(
+                        SERVER_URL + "/changeOwner?", 
+                        {
+                            identity: identity,
+                            newOwner: delegate,
+                            signature: badSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, false, 'Have a success response')
+                })
+            });
+        })
+        
+        describe("addDelegate()", async() => {
+            it("validDelegate should be false", async () => {
+                await checkValidDelegatePOST(
+                    identity,
+                    delegateType,
+                    delegate3,
+                    false
+                    )
+            })
+
+            describe("Correct Signature", async() => {
+                it("delegate added successfully", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/addDelegate?", 
+                        {
+                            identity: identity,
+                            delegateType: delegateType,
+                            delegate: delegate3,
+                            validity: validity,
+                            signature: testSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("validDelegate should be true", async () => {
+                    await sleep(1000)
+                    await checkValidDelegatePOST(
+                        identity,
+                        delegateType,
+                        delegate3,
+                        true
+                        )
+                })
+            })
+
+            describe("Bad Signature", async() => {
+                it("should fail", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/addDelegate?", 
+                        {
+                            identity: identity,
+                            delegateType: delegateType,
+                            delegate: delegate3,
+                            validity: validity,
+                            signature: badSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, false, 'Failed to add delegate')
+                })
+            })
+        })
+
+        describe("revokeDelegate()", async() => {
+            it("validDelegate should be true", async () => {
+                await sleep(1000)
+                await checkValidDelegatePOST(
+                    identity,
+                    delegateType,
+                    delegate3,
+                    true
+                    )
+            })
+
+            describe("Correct Signature", async() => {
+
+                it("delegate revoke successfully", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/revokeDelegate?", 
+                        {
+                            identity: identity,
+                            delegateType: delegateType,
+                            delegate: delegate3,
+                            signature: testSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("RevokeDelegate Response", response)
+        
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("validDelegate should be false", async () => {
+                    await sleep(1000)
+                    await checkValidDelegatePOST(
+                        identity,
+                        delegateType,
+                        delegate3,
+                        false
+                        )
+                })
+            })
+
+            describe("Bad Signature", async() => {
+                it("should fail", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/revokeDelegate?", 
+                        {
+                            identity: identity,
+                            delegateType: delegateType,
+                            delegate: delegate3,
+                            signature: badSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')
+        
+                    // console.log("Response", response)
+        
+                    assert.equal(response.data.success, false, 'Failed to add delegate')
+                })
+            })
+        })
+        
+        describe("setAttribute()", async () => {
+            describe("Correct Signature", async() => {
+
+                it("Set attribute successfully", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/setAttribute?", 
+                        {
+                            identity: identity,
+                            name: attributeName,
+                            value: attributeValue,
+                            validity: validity,
+                            signature: testSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+            })
+
+            describe("Bad Signature", async() => {
+                it("Should fail", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/setAttribute?", 
+                        {
+                            identity: identity,
+                            name: attributeName,
+                            value: attributeValue,
+                            validity: validity,
+                            signature: badSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed to set attribute')
+                })
+            })
+        })
+
+        describe("revokeAttribute()", async () => {
+            describe("Bad Signature", async() => {
+                it("Should fail", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/revokeAttribute?", 
+                        {
+                            identity: identity,
+                            name: attributeName,
+                            value: attributeValue,
+                            signature: badSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed to revoke attribute')
+                })
+            })
+
+            describe("Correct Signature", async() => {
+
+                it("Revoke attribute successfully", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/revokeAttribute?", 
+                        {
+                            identity: identity,
+                            name: attributeName,
+                            value: attributeValue,
+                            signature: testSignature 
+                        })
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+            })
+        })
+
+        describe("bulkAdd()",async () => {
+            it("validity of delegates should be false",async () => {
+                await checkValidDelegatePOST(
+                    identity,
+                    formatBytes32String("bulktest-1"),
+                    delegate3,
+                    false                
+                )
+
+                await checkValidDelegatePOST(
+                    identity,
+                    formatBytes32String("bulktest-2"),
+                    delegate2,
+                    false                
+                )
+            })
+            describe("Correct signature",async () => {
+                it ("Failed because of inavlid arguments", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/bulkAdd?", 
+                        {
+                            identity: identity,
+                            delegateParams: "InvalidArgs",
+                            attributeParams: "InvalidArgs",
+                            signature: testSignature 
+                        })
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed by invalid arguments')
+                })
+
+                it("bulkAdd success for empty values", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/bulkAdd?", 
+                        {
+                            identity: identity,
+                            delegateParams: JSON.stringify([]),
+                            attributeParams: JSON.stringify([]),
+                            signature: testSignature 
+                        })
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("bulkAdd success", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/bulkAdd?", 
+                        {
+                            identity: identity,
+                            delegateParams: JSON.stringify(delegateParams),
+                            attributeParams: JSON.stringify(attributeParams),
+                            signature: testSignature 
+                        })
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("validity of delegates should be true",async () => {
+                    // await sleep(2000)
+                    await checkValidDelegatePOST(
+                        identity,
+                        formatBytes32String("bulktest-1"),
+                        delegate3,
+                        true
+                    )
+        
+                    await checkValidDelegatePOST(
+                        identity,
+                        formatBytes32String("bulktest-2"),
+                        delegate2,
+                        true
+                    )
+                })
+            })
+
+            describe("Bad signature", async() => {
+                it("should fail", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/bulkAdd?", 
+                        {
+                            identity: identity,
+                            delegateParams: JSON.stringify(delegateParams),
+                            attributeParams: JSON.stringify(attributeParams),
+                            signature: badSignature 
+                        })
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Have a success response')
+                })
+            })
+        })
+
+        describe("bulkRevoke()",async () => {
+            it("validity of delegates should be true",async () => {
+                await checkValidDelegatePOST(
+                    identity,
+                    formatBytes32String("bulktest-1"),
+                    delegate3,
+                    true
+                )
+
+                await checkValidDelegatePOST(
+                    identity,
+                    formatBytes32String("bulktest-2"),
+                    delegate2,
+                    true
+                )
+            })
+
+            describe("Bad signature", async() => {
+                it("should fail", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/bulkRevoke?", 
+                        {
+                            identity: identity,
+                            delegateParams: JSON.stringify(revokeDelegateParams),
+                            attributeParams: JSON.stringify(revokeAttributeParams),
+                            signature: badSignature 
+                        })
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed by bad signature')
+                })
+            })
+
+            describe("Correct signature",async () => {
+                it ("Failed because of inavlid arguments", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/bulkRevoke?", 
+                        {
+                            identity: identity,
+                            delegateParams: "InvalidArgs",
+                            attributeParams: "InvalidArgs",
+                            signature: testSignature 
+                        })
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, false, 'Failed by invalid arguments')
+                })
+
+                it("bulkRevoke success for empty values", async() => {
+                    const response: any = await server.post(
+                        SERVER_URL + "/bulkRevoke?", 
+                        {
+                            identity: identity,
+                            delegateParams: JSON.stringify([]),
+                            attributeParams: JSON.stringify([]),
+                            signature: testSignature 
+                        })
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("bulkRevoke success", async() => {
+                    await sleep(1000)
+                    const response: any = await server.post(
+                        SERVER_URL + "/bulkRevoke?", 
+                        {
+                            identity: identity,
+                            delegateParams: JSON.stringify(revokeDelegateParams),
+                            attributeParams: JSON.stringify(revokeAttributeParams),
+                            signature: testSignature 
+                        })
+                    // console.log("bulkAdd Response:", response)
+                    assert.ok(response && response.data, 'Have a response')    
+                    assert.equal(response.data.success, true, 'Have a success response')
+                })
+
+                it("validity of delegates should be false",async () => {
+                    await sleep(1000)
+                    await checkValidDelegatePOST(
+                        identity,
+                        formatBytes32String("bulktest-1"),
+                        delegate3,
+                        false
+                    )
+        
+                    await checkValidDelegatePOST(
+                        identity,
+                        formatBytes32String("bulktest-2"),
+                        delegate2,
+                        false
+                    )
+                })
+            })     
+        })
     })
 });
