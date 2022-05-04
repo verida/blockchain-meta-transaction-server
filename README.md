@@ -22,7 +22,7 @@ _EX_: Please refer line4 & line8 in "src/routes.ts" file.
 _EX_: Please refer "tests/vda-did-registry.test.ts".
 
 ## Test
-### 1. Instal dependencies
+### 1. Install dependencies
 After clone this repo, please run following command inside project directory:
 ```
 yarn install
