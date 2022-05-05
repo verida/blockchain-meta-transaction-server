@@ -15,10 +15,20 @@ export default class GenericController {
      */
     public static async contract(req: Request, res: Response) {
         const { contract, method } = req.params
-        const contractData = req.body
 
         // @todo: try / catch to check if invalid contract specified
         const contractJson = require(`./contracts/${contract}/abi.json`)
+        const config = require(`./contracts/${contract}/config`)
+
+        const isValid = await config.isRequestValid(req)
+        if (!isValid) {
+            return res.status(400).send({
+                status: "fail",
+                data: {
+                    message: 'Permission denied for this request'
+                }
+            })
+        }
 
         const abi = contractJson.abi
         let abiMethod: any = false
@@ -52,6 +62,8 @@ export default class GenericController {
                 default:
                     finalParams[param.name] = req.body[param.name]
             }
+
+            finalParams[param.name] = config.customParams(param.name, req.body[param.name])
         })
 
         // @todo: actually call the smart contract
