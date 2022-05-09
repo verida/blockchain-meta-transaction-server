@@ -2,17 +2,104 @@ import { Console } from 'console';
 import { Request, Response } from 'express'
 import Web3 from 'web3'
 
+require('dotenv').config()
+
 const fs = require('fs')
 
 const log4js = require("log4js")
 const logger = log4js.getLogger()
 logger.level = "debug";
 
-const web3 = new Web3('https://speedy-nodes-nyc.moralis.io/bd1c39d7c8ee1229b16b4a97/bsc/testnet');
-const { privateKey } = require('../.evn.json')
+// const web3 = new Web3('https://speedy-nodes-nyc.moralis.io/bd1c39d7c8ee1229b16b4a97/bsc/testnet');
+const web3 = new Web3(process.env.RPC_URL_BSC_TESTNET)
+const { privateKey } = require('../.env.json')
 const { address: admin } = web3.eth.accounts.wallet.add(privateKey)
 
+type fnParameterConfig = (paramName: any, paramData: any) => any
+
 export default class GenericController {
+
+    private static parseParams(req:Request, abiMethod:any, fnConfig: fnParameterConfig) : any | never {
+        // Loop through all the parameters and convert to the correct type
+        const finalParams = {} as any
+        try {
+            abiMethod.inputs.forEach((param: any) => {
+                // console.log(param)
+                let paramData : any
+                switch (param.type) {
+                    // @todo: convert types from string to correct type
+                    // case 'address':{
+                    //     break;
+                    // }
+                    // case 'bytes32':{
+                    //     break;
+                    // }
+                    case 'tuple[]':{
+                        paramData = JSON.parse(req.body[param.name]);
+                        break;                    
+                    }
+                    default: {
+                        paramData = req.body[param.name]
+                        break;
+                    }
+                        
+                }
+                finalParams[param.name as string] = fnConfig(param.name, paramData)
+            })
+        } catch(e) {
+            console.log("Parsing Error", e)
+            throw new Error()
+        }
+        return finalParams
+    }
+
+    private static async callContractFunction(abi: any, address: string, abiMethod: any, finalParams: any) {
+        const controller = new web3.eth.Contract(abi, address)
+
+        let ret;
+
+        if (abiMethod.stateMutability === 'view') {
+            // View Function
+            // console.log("values = ", ...(Object.values(finalParams)))
+            ret = await eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams))).call()`)
+        } 
+        else {
+            // Make transaction
+            try {
+                const tx = eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams)))`)
+
+                // console.log("Sending Params: ", finalParams)
+
+                // const [gasPrice, gasCost] = await Promise.all([web3.eth.getGasPrice(), tx.estimateGas({ from: admin })])
+                const gasPrice = await web3.eth.getGasPrice()
+                let gasCost = await tx.estimateGas({ from: admin })
+                gasCost += 100
+
+                // const gasPrice = 10000000000
+                // const gasCost = 100000
+
+                const data = tx.encodeABI()
+
+                const txData = {
+                    from: admin,
+                    to: controller.options.address,
+                    data,
+                    gas: gasCost,
+                    gasPrice,
+                }
+
+                ret = await web3.eth.sendTransaction(txData)
+            } catch(e) {
+                console.log("Failed Transaction: ", e)
+                // return res.status(200).send({
+                //     success: false,
+                //     data: e
+                // })
+                throw new Error()
+            }
+        }
+        return ret
+    }
 
     /**
      * 
@@ -53,6 +140,7 @@ export default class GenericController {
 
         // console.log("GenericController", "Valid")
 
+        // Find method in contract
         const abi = contractJson.abi
         let abiMethod: any = false
         abi.forEach((item: any) => {
@@ -73,33 +161,11 @@ export default class GenericController {
 
         // console.log("Found abiMethod definition", abiMethod)
 
-        // Loop through all the parameters and convert to the correct type
-        const finalParams = {} as any
+        let finalParams : any
         try {
-            abiMethod.inputs.forEach((param: any) => {
-                // console.log(param)
-                let paramData : any
-                switch (param.type) {
-                    // @todo: convert types from string to correct type
-                    // case 'address':{
-                    //     break;
-                    // }
-                    // case 'bytes32':{
-                    //     break;
-                    // }
-                    case 'tuple[]':{
-                        paramData = JSON.parse(req.body[param.name]);
-                        break;                    
-                    }
-                    default: {
-                        paramData = req.body[param.name]
-                        break;
-                    }
-                        
-                }
-                finalParams[param.name as string] = config.customParams(param.name, paramData)
-            })
-        } catch(e) {
+            finalParams = GenericController.parseParams(req, abiMethod, config.customParams)
+        } catch (e) {
+            console.log("***ParseParam Failed", e)
             return res.status(200).send({
                 success: false,
                 data: {
@@ -107,64 +173,26 @@ export default class GenericController {
                 }
             })
         }
-
         // console.log("Params: ", finalParams)
 
         // @todo: actually call the smart contract
         const address = config.getContractAddress()
-        const controller = new web3.eth.Contract(abi, address)
 
         let ret;
-
-        if (abiMethod.stateMutability === 'view') {
-            // View Function
-            // console.log("values = ", ...(Object.values(finalParams)))
-            ret = await eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams))).call()`)
-        } 
-        else {
-            // Make transaction
-            try {
-                const tx = eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams)))`)
-
-                // console.log("Sending Params: ", finalParams)
-
-                // const [gasPrice, gasCost] = await Promise.all([web3.eth.getGasPrice(), tx.estimateGas({ from: admin })])
-                const gasPrice = await web3.eth.getGasPrice()
-                let gasCost = await tx.estimateGas({ from: admin })
-                gasCost += 100
-
-                // const gasPrice = 10000000000
-                // const gasCost = 100000
-
-                const data = tx.encodeABI()
-
-                const txData = {
-                    from: admin,
-                    to: controller.options.address,
-                    data,
-                    gas: gasCost,
-                    gasPrice,
-                }
-
-                ret = await web3.eth.sendTransaction(txData)
-            } catch(e) {
-                console.log("Failed Transaction: ", e)
-                return res.status(200).send({
-                    success: false,
-                    data: e
-                })
-            }
-            
+        try {
+            ret = await GenericController.callContractFunction(abi, address, abiMethod, finalParams)
+        } catch(e) {
+            console.log("Failed Transaction: ", e)
+            return res.status(200).send({
+                success: false,
+                data: e
+            })
         }
-        
+
         return res.status(200).send({
             success: true,
             data: ret // finalParams
         })
-    }
-
-    private static async runSendTransaction(tx: any) {
-        
     }
 
 }

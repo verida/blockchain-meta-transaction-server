@@ -239,6 +239,7 @@ describe("Generic Server Tests", function() {
     // });
 
     describe("Http POST requests test",async () => {
+
         describe("changeOwner()",async () => {
             describe("Correct Signature", async () => {
                 it("Change Success", async () => {                
@@ -419,6 +420,7 @@ describe("Generic Server Tests", function() {
             describe("Correct Signature", async() => {
 
                 it("Set attribute successfully", async() => {
+                    await sleep(1000)
                     const response: any = await server.post(
                         SERVER_URL + "/setAttribute", 
                         {
@@ -435,6 +437,7 @@ describe("Generic Server Tests", function() {
 
             describe("Bad Signature", async() => {
                 it("Should fail", async() => {
+                    await sleep(1000)
                     const response: any = await server.post(
                         SERVER_URL + "/setAttribute", 
                         {
@@ -453,6 +456,7 @@ describe("Generic Server Tests", function() {
         describe("revokeAttribute()", async () => {
             describe("Bad Signature", async() => {
                 it("Should fail", async() => {
+                    await sleep(1000)
                     const response: any = await server.post(
                         SERVER_URL + "/revokeAttribute", 
                         {
@@ -484,6 +488,7 @@ describe("Generic Server Tests", function() {
             })
         })
 
+        /*
         describe("bulkAdd()",async () => {
             it("validity of delegates should be false",async () => {
                 await checkValidDelegatePOST(
@@ -673,5 +678,6 @@ describe("Generic Server Tests", function() {
                 })
             })     
         })
+        */
     })
 });

@@ -58,24 +58,25 @@ const getAxios = async () => {
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
 const SERVER_URL_HOME = `http://localhost:${PORT}`
-const SERVER_URL = `http://localhost:${PORT}/vda-did-registry`
+const SERVER_URL = `http://localhost:${PORT}/vda-name-registry`
 
+const testNames = [
+    formatBytes32String("John"),
+    formatBytes32String("Smith Elba"),
+    formatBytes32String("Bill Clin"),
+    formatBytes32String("Jerry Smith"),
+];
 
-const identity = "0x268c970A5FBFdaFfdf671Fa9d88eA86Ee33e14B1"
-const identity2 = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
-const delegate = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
-const delegate2 = "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
-const delegate3 = "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"
-const badBoy = "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc"
+const testDIDs = [
+    "0x181aB2d2F0143cd2046253c56379f7eDb1E9C133",
+    "0x2b3f34e9d4b127797ce6244ea341a83733ddd6e4",
+    "0x327c1FEd75440d4c3fA067E633A3983D211f0dfD",
+    "0x4f41ce9d745404acd3f068E632A1781Da11f0dfD",
+];
 
-const delegateType = formatBytes32String("attestor")
-const validity = 86400
-
-const attributeName = formatBytes32String("encryptionKey")
-const attributeValue = formatBytes32String("encryptionKey")
+const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 const testSignature = "0x67de2d20880a7d27b71cdcb38817ba95800ca82dff557cedd91b96aacb9062e80b9e0b8cb9614fd61ce364502349e9079c26abaa21890d7bc2f1f6c8ff77f6261c"
-
 const badSignature = "0xf157fd349172fa8bb84710d871724091947289182373198723918cabcc888ef888ff8876956050565d5757a57d868b8676876e7678687686f95419238191488923"
 
 let server

@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "yarn build; nodemon src/server.js",
-    "copy": "cp src/contracts/**/*.json dist/contracts/**/",
+    "copy": "cd src/contracts && find . -name \"*.json\" | xargs cp --parents -t ../../dist/contracts && cd ../../",
     "build": "rm -rf dist && tsc && yarn copy",
     "prestart": "yarn build",
     "start": "node dist/server.js",
@@ -28,7 +28,7 @@
     "@verida/did-client": "^0.1.7",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
+    "dotenv": "^16.0.0",
     "ethers": "^5.6.4",
     "express": "^4.17.1",
     "express-basic-auth": "git+https://github.com/Mozzler/express-basic-auth.git",
