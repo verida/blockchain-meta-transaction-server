@@ -168,6 +168,13 @@ revokeAttributeParams.push({
     value: "0x12345678",
 })
 
+// Authentication header for http requests
+const auth_header = {
+    headers: {
+        'authentication': 'valid user-agent'
+    }
+}
+
 
 describe("Generic Server Tests", function() {
     before(async () =>{
@@ -175,6 +182,8 @@ describe("Generic Server Tests", function() {
         server = await getAxios()
     })
 
+
+    /*
     // Testing while development
     describe("Develop Testing", async() => {
         // it("bulkAdd success", async() => {
@@ -196,10 +205,6 @@ describe("Generic Server Tests", function() {
                 SERVER_URL + "/identityOwner", 
                 {
                     identity: identity
-                }, {
-                    headers: {
-                        'authorization': 'Verida gasless transaction-1'
-                    }
                 }
             )
     
@@ -210,38 +215,27 @@ describe("Generic Server Tests", function() {
             
         })
 
-        // it("changeOwner", async () => {                
-        //     const response: any = await server.post(
-        //         SERVER_URL + "/changeOwner", 
-        //         {
-        //             identity: identity,
-        //             newOwner: delegate,
-        //             signature: testSignature
-        //         }
-        //     )
+        it("changeOwner", async () => {                
+            const response: any = await server.post(
+                SERVER_URL + "/changeOwner", 
+                {
+                    identity: identity,
+                    newOwner: delegate,
+                    signature: testSignature
+                }, auth_header
+            )
         
-        //     // assert.ok(response && response.data, 'Have a response')
-        //     // assert.equal(response.data.success, true, 'Have a success response')
+            // assert.ok(response && response.data, 'Have a response')
+            // assert.equal(response.data.success, true, 'Have a success response')
     
-        //     console.log("Response", response)
+            console.log("Response", response)
             
-        // })
+        })
     })
+    */
     
-
-    // describe("Basic endpoints", async () => {
-    //     it("Basic End Point", async () => {
-    //         const response: any = await server.get(SERVER_URL_HOME)
-
-    //         // console.log("Returned: ", response.data)
-    //         assert.ok(response && response.data, 'Have a response')
-    //         // assert.equal(response.data.status, 'success', 'Have a success response')
-    //     })
-    // });
-
     describe("Http POST requests test",async () => {
 
-        /*
         describe("changeOwner()",async () => {
             describe("Correct Signature", async () => {
                 it("Change Success", async () => {                
@@ -251,7 +245,8 @@ describe("Generic Server Tests", function() {
                             identity: identity,
                             newOwner: delegate,
                             signature: testSignature
-                        }
+                        }, 
+                        auth_header                        
                     )
                     assert.ok(response && response.data, 'Have a response')
         
@@ -268,11 +263,13 @@ describe("Generic Server Tests", function() {
                 it("Restore owner of identity for another test", async () => {
                     await sleep(1000)
                     const response: any = await server.post(
-                        SERVER_URL + "/changeOwner", {
-                        identity: identity,
-                        newOwner: identity,
-                        signature: testSignature 
-                    })
+                        SERVER_URL + "/changeOwner", 
+                        {
+                            identity: identity,
+                            newOwner: identity,
+                            signature: testSignature 
+                        },
+                        auth_header)
                     // console.log("Response", response)
                     assert.ok(response && response.data, 'Have a response')   
                     assert.equal(response.data.success, true, 'Have a success response')
@@ -289,7 +286,8 @@ describe("Generic Server Tests", function() {
                             identity: identity,
                             newOwner: delegate,
                             signature: badSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')
         
                     // console.log("Response", response)
@@ -320,7 +318,8 @@ describe("Generic Server Tests", function() {
                             delegate: delegate3,
                             validity: validity,
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')
         
                     // console.log("Response", response)
@@ -349,7 +348,8 @@ describe("Generic Server Tests", function() {
                             delegate: delegate3,
                             validity: validity,
                             signature: badSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')
         
                     // console.log("Response", response)
@@ -380,7 +380,8 @@ describe("Generic Server Tests", function() {
                             delegateType: delegateType,
                             delegate: delegate3,
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')
         
                     // console.log("RevokeDelegate Response", response)
@@ -408,7 +409,8 @@ describe("Generic Server Tests", function() {
                             delegateType: delegateType,
                             delegate: delegate3,
                             signature: badSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')
         
                     // console.log("Response", response)
@@ -431,7 +433,8 @@ describe("Generic Server Tests", function() {
                             value: attributeValue,
                             validity: validity,
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, true, 'Have a success response')
                 })
@@ -448,7 +451,8 @@ describe("Generic Server Tests", function() {
                             value: attributeValue,
                             validity: validity,
                             signature: badSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, false, 'Failed to set attribute')
                 })
@@ -466,7 +470,8 @@ describe("Generic Server Tests", function() {
                             name: attributeName,
                             value: attributeValue,
                             signature: badSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, false, 'Failed to revoke attribute')
                 })
@@ -483,15 +488,14 @@ describe("Generic Server Tests", function() {
                             name: attributeName,
                             value: attributeValue,
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, true, 'Have a success response')
                 })
             })
         })
-        */
 
-        /*
         describe("bulkAdd()",async () => {
             it("validity of delegates should be false",async () => {
                 await checkValidDelegatePOST(
@@ -517,7 +521,8 @@ describe("Generic Server Tests", function() {
                             delegateParams: "InvalidArgs",
                             attributeParams: "InvalidArgs",
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     // console.log("bulkAdd Response:", response)
                     // assert.ok(response && response.data, 'Have a response')
                     // assert.equal(response.data.success, false, 'Failed by invalid arguments')
@@ -528,10 +533,11 @@ describe("Generic Server Tests", function() {
                         SERVER_URL + "/bulkAdd", 
                         {
                             identity: identity,
-                            delegateParams: JSON.stringify([]),
-                            attributeParams: JSON.stringify([]),
+                            delegateParams: [],
+                            attributeParams: [],
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     // console.log("bulkAdd Response:", response)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, true, 'Have a success response')
@@ -542,10 +548,11 @@ describe("Generic Server Tests", function() {
                         SERVER_URL + "/bulkAdd", 
                         {
                             identity: identity,
-                            delegateParams: JSON.stringify(delegateParams),
-                            attributeParams: JSON.stringify(attributeParams),
+                            delegateParams: delegateParams,
+                            attributeParams: attributeParams,
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     // console.log("bulkAdd Response:", response)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, true, 'Have a success response')
@@ -575,10 +582,11 @@ describe("Generic Server Tests", function() {
                         SERVER_URL + "/bulkAdd", 
                         {
                             identity: identity,
-                            delegateParams: JSON.stringify(delegateParams),
-                            attributeParams: JSON.stringify(attributeParams),
+                            delegateParams: delegateParams,
+                            attributeParams: attributeParams,
                             signature: badSignature 
-                        })
+                        },
+                        auth_header)
                     // console.log("bulkAdd Response:", response)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, false, 'Have a success response')
@@ -609,10 +617,11 @@ describe("Generic Server Tests", function() {
                         SERVER_URL + "/bulkRevoke", 
                         {
                             identity: identity,
-                            delegateParams: JSON.stringify(revokeDelegateParams),
-                            attributeParams: JSON.stringify(revokeAttributeParams),
+                            delegateParams: revokeDelegateParams,
+                            attributeParams: revokeAttributeParams,
                             signature: badSignature 
-                        })
+                        },
+                        auth_header)
                     // console.log("bulkAdd Response:", response)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, false, 'Failed by bad signature')
@@ -628,7 +637,8 @@ describe("Generic Server Tests", function() {
                             delegateParams: "InvalidArgs",
                             attributeParams: "InvalidArgs",
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     // console.log("bulkAdd Response:", response)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, false, 'Failed by invalid arguments')
@@ -639,10 +649,11 @@ describe("Generic Server Tests", function() {
                         SERVER_URL + "/bulkRevoke", 
                         {
                             identity: identity,
-                            delegateParams: JSON.stringify([]),
-                            attributeParams: JSON.stringify([]),
+                            delegateParams: [],
+                            attributeParams: [],
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     // console.log("bulkAdd Response:", response)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, true, 'Have a success response')
@@ -654,10 +665,11 @@ describe("Generic Server Tests", function() {
                         SERVER_URL + "/bulkRevoke", 
                         {
                             identity: identity,
-                            delegateParams: JSON.stringify(revokeDelegateParams),
-                            attributeParams: JSON.stringify(revokeAttributeParams),
+                            delegateParams: revokeDelegateParams,
+                            attributeParams: revokeAttributeParams,
                             signature: testSignature 
-                        })
+                        },
+                        auth_header)
                     // console.log("bulkAdd Response:", response)
                     assert.ok(response && response.data, 'Have a response')    
                     assert.equal(response.data.success, true, 'Have a success response')
@@ -681,6 +693,5 @@ describe("Generic Server Tests", function() {
                 })
             })     
         })
-        */
     })
 });

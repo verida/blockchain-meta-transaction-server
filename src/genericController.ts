@@ -127,16 +127,7 @@ export default class GenericController {
             })
         }
 
-        const isValid = await config.isRequestValid(req)
-        if (!isValid) {
-            return res.status(400).send({
-                // status: "fail",
-                success: false,
-                data: {
-                    message: 'Permission denied for this request'
-                }
-            })
-        }
+        
 
         // console.log("GenericController", "Valid")
 
@@ -159,6 +150,22 @@ export default class GenericController {
             })
         }
 
+        if (abiMethod.stateMutability !== 'view') {
+            // Check RequestValidity if calling function is not View type.
+            console.log("Checking request validity");
+            
+            const isValid = await config.isRequestValid(req)
+            if (!isValid) {
+                return res.status(400).send({
+                    // status: "fail",
+                    success: false,
+                    data: {
+                        message: 'Permission denied for this request'
+                    }
+                })
+            }
+        }
+        
         // console.log("Found abiMethod definition", abiMethod)
 
         let finalParams : any
