@@ -34,10 +34,10 @@ export default class GenericController {
                     // case 'bytes32':{
                     //     break;
                     // }
-                    case 'tuple[]':{
-                        paramData = JSON.parse(req.body[param.name]);
-                        break;                    
-                    }
+                    // case 'tuple[]':{
+                    //     paramData = JSON.parse(req.body[param.name]);
+                    //     break;                    
+                    // }
                     default: {
                         paramData = req.body[param.name]
                         break;

@@ -13,9 +13,30 @@ dotenv.config();
 
 // Set up the express app
 const app = express();
-const validator = new RequestValidator()
+// const validator = new RequestValidator()
 
 const corsConfig = {}
+
+function authentication(req:any,res:any,next:any) {
+  let authHeader = req.headers.authorization;
+
+  console.log("Authennticating: ", req.headers);
+
+  if (!authHeader) {
+    let err = new Error('You\'re not authenticated!');
+    console.log('Not authenticated');
+    return next(err)
+  }
+
+  if (authHeader !== 'Verida gasless transaction') {
+    let err = new Error('Wrong authentication!');
+    console.log('Wrong authentication');
+    return next(err)
+  }
+
+  next()
+}
+
 
 // Parse incoming requests data
 app.use(cors(corsConfig))
@@ -27,6 +48,10 @@ app.use(bodyParser.urlencoded({ extended: false }))
   authorizeAsync: true,
   unauthorizedResponse: validator.getUnauthorizedResponse
 }))*/
+
+// Add basic authentication
+app.use(authentication)
+
 app.use(router)
 
 //DbManager.ensureDb(process.env.DB_DOC_NAME)

@@ -58,7 +58,7 @@ const getAxios = async () => {
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
 const SERVER_URL_HOME = `http://localhost:${PORT}`
-const SERVER_URL = `http://localhost:${PORT}/vda-did-registry`
+const SERVER_URL = `http://localhost:${PORT}/VeridaDIDRegistry`
 
 
 const identity = "0x268c970A5FBFdaFfdf671Fa9d88eA86Ee33e14B1"
@@ -75,7 +75,6 @@ const attributeName = formatBytes32String("encryptionKey")
 const attributeValue = formatBytes32String("encryptionKey")
 
 const testSignature = "0x67de2d20880a7d27b71cdcb38817ba95800ca82dff557cedd91b96aacb9062e80b9e0b8cb9614fd61ce364502349e9079c26abaa21890d7bc2f1f6c8ff77f6261c"
-
 const badSignature = "0xf157fd349172fa8bb84710d871724091947289182373198723918cabcc888ef888ff8876956050565d5757a57d868b8676876e7678687686f95419238191488923"
 
 let server
@@ -176,7 +175,6 @@ describe("Generic Server Tests", function() {
         server = await getAxios()
     })
 
-    /*
     // Testing while development
     describe("Develop Testing", async() => {
         // it("bulkAdd success", async() => {
@@ -198,6 +196,10 @@ describe("Generic Server Tests", function() {
                 SERVER_URL + "/identityOwner", 
                 {
                     identity: identity
+                }, {
+                    headers: {
+                        'authorization': 'Verida gasless transaction-1'
+                    }
                 }
             )
     
@@ -208,24 +210,23 @@ describe("Generic Server Tests", function() {
             
         })
 
-        it("changeOwner", async () => {                
-            const response: any = await server.post(
-                SERVER_URL + "/changeOwner", 
-                {
-                    identity: identity,
-                    newOwner: delegate,
-                    signature: testSignature
-                }
-            )
+        // it("changeOwner", async () => {                
+        //     const response: any = await server.post(
+        //         SERVER_URL + "/changeOwner", 
+        //         {
+        //             identity: identity,
+        //             newOwner: delegate,
+        //             signature: testSignature
+        //         }
+        //     )
         
-            // assert.ok(response && response.data, 'Have a response')
-            // assert.equal(response.data.success, true, 'Have a success response')
+        //     // assert.ok(response && response.data, 'Have a response')
+        //     // assert.equal(response.data.success, true, 'Have a success response')
     
-            console.log("Response", response)
+        //     console.log("Response", response)
             
-        })
+        // })
     })
-    */
     
 
     // describe("Basic endpoints", async () => {
@@ -240,6 +241,7 @@ describe("Generic Server Tests", function() {
 
     describe("Http POST requests test",async () => {
 
+        /*
         describe("changeOwner()",async () => {
             describe("Correct Signature", async () => {
                 it("Change Success", async () => {                
@@ -487,6 +489,7 @@ describe("Generic Server Tests", function() {
                 })
             })
         })
+        */
 
         /*
         describe("bulkAdd()",async () => {
