@@ -49,19 +49,10 @@ export default class Config {
     public static async isRequestValid(req: any) {
         // @todo: validate the request (ie: authentication, valid user-agent etc.)
 
-        let authHeader = req.headers.authentication;
-
         console.log("Authennticating: ", req.headers);
 
-        if (!authHeader) {
-            // let err = new Error('You\'re not authenticated!');
-            console.log('Not authenticated');
-            return false
-        }
-
-        if (authHeader !== 'valid user-agent') {
-            // let err = new Error('Wrong authentication!');
-            console.log('Wrong authentication');
+        if (!(req.headers['user-agent'].includes('Verida-Vault'))) {
+            console.log('No authentication info')
             return false
         }
 

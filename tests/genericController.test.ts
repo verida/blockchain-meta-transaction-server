@@ -171,7 +171,7 @@ revokeAttributeParams.push({
 // Authentication header for http requests
 const auth_header = {
     headers: {
-        'authentication': 'valid user-agent'
+        'user-agent': 'Verida-Vault'
     }
 }
 
