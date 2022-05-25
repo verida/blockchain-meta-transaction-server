@@ -1,22 +1,18 @@
-# Verida gasless server
-**Verida Gasless Server** provide Http GET & POST endpoints for interactions to smart contracts of Verida.
+# Verida meta-transaction-server
+**Verida meta-transaction-server** provide Http GET & POST endpoints for interactions to smart contracts of Verida.
 Every contract developers in **Verida** can create supports for his contract.
 ## Add support for individual contract
-### 1. Get ready contract related info<br/>
-- Deploy smart contract and get contract address.
-- Create a folder inside "artifacts/contracts/" directory and add abi file there.<br/><br/>
+### 1. Deploy smart contract to targeting net<br/>
+Verida smart contracts should be deployed to support meta transactions.
+Once deployed, you will get contract address & contract abi file.
 
-*Ex*: You can see "artifacts/contracts/EthereumDIDRegistry.sol/EthereumDidRegistry.json" file for **DID-Registry** contract.
-### 2. Create a typescript file inside "src" directory
-- Create HTTP/GET endpoints that interacts with smart contract using Verida wallet account
-- Export **router** that is created in this file
+### 2. Configure settings to support meta-transactions in `meta-transaction-server` project.
+Create a folder named by contract name inside "contracts" directory.
+- Copy contract abi file (from step 1) to newly created directory. ABI file must be named as `abi.json`.
+- Create `config.ts` file inside directory and set up necessary functions.<br/><br/>
+*Ex*: You can see `abi.json` and `config.ts` files inside "contracts/VeridaDIDRegistry/".
 
-_Ex_: Please refer "src/vda-did-registry.ts".
-### 3. Register router to main router
-- Register created router in step 2 to main router(src/routes.ts).
-
-_EX_: Please refer line4 & line8 in "src/routes.ts" file.
-### 4. Create test code
+### 3. Create test code
 - Create a test code inside "src" directory
 
 _EX_: Please refer "tests/vda-did-registry.test.ts".
@@ -44,12 +40,24 @@ yarn test <testcode file name>
 ```
 _Ex_: `yarn test tests/vda-did-registry.test.ts`
 
+## Hosting server as production
+### 1. Get ready company wallet account
+To host meta-transaction-server, we need company wallet account that will pay gas fees on meta transactions.
+### 2. Register company wallet account to project
+Create `.env.json` file inside project directory(meaning "blockchain-meta-transaction-server/").
+Add private key of company wallet account to this file:
+```
+{
+    "privateKey" : "355...de"
+}
+```
+
 # VDA-DID-Registry contract
-All end-points for VDA-DID-Registry contracts has prefix of "/vda-did-registry" in its path: 
+All end-points for VDA-DID-Registry contracts has prefix of "/VeridaDIDRegistry" in its path: 
 ```
-https://hosting-server-url/vda-did-registry/...
+https://hosting-server-url/VeridaDIDRegistry/...
 ```
-_Ex_: https://localhost:5021/vda-did-registry/identityOwner?identity=0x268c970A5FBFdaFfdf671Fa9d88eA86Ee33e14B1<br/><br/>
+_Ex_: https://localhost:5021/VeridaDIDRegistry/identityOwner?identity=0x268c970A5FBFdaFfdf671Fa9d88eA86Ee33e14B1<br/><br/>
 
 There are 9 endpoints for **VDA-DID-Registry** contract:
 - identityOwner
