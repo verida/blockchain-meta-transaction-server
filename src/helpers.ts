@@ -3,11 +3,22 @@ import * as base64 from '@ethersproject/base64'
 import { Base58 } from '@ethersproject/basex'
 import { toUtf8Bytes } from '@ethersproject/strings'
 
+/**
+ * Convert string to Bytes32
+ * @param str - Input string
+ * @returns - string of Bytes32 value
+ */
 export function stringToBytes32(str: string) {
   const buffStr = '0x' + Buffer.from(str).slice(0, 32).toString('hex')
   return buffStr + '0'.repeat(66 - buffStr.length)
 }
 
+/**
+ * Convert string to hex values types
+ * @param key - Key of string type
+ * @param value - Value that needs convertion
+ * @returns {string} - String value in hex format
+ */
 export function attributeToHex(key: string , value : string | Uint8Array) {
   if (value instanceof Uint8Array || isBytes(value)) {
     return hexlify(value)

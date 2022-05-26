@@ -1,18 +1,28 @@
 import { BytesLike } from 'ethers';
 import {stringToBytes32} from '../../helpers'
+
+/** Interface representing parameters to add/revoke delegates operations */
 interface DelegateParamType {
+    /** delegate type */
     delegateType: string
 }
+
+/** Interface representing parameters to add/revoke attributes operation */
 interface AttributeParamType {
+    /** name of attribute */
     name: string;
+    /** string value of attribute */
     value: string;
 }
-// type DelegateParam = {
-//     delegateType: BytesLike;
-//     delegate: string;
-//     validity?: BigNumberish;
-//   };
+
+/** Class representing configuration for VeridaDIDRegistry smart contract */
 export default class Config {
+    /**
+     * Parse parameters from http request and adjust before interacting with smart contract
+     * @param paramName - parameter name in HTTP POST body
+     * @param paramData - parameter value in HTTP POST body
+     * @returns adjusted parameter value
+     */
     public static customParams(paramName: any, paramData: any) {
         switch(paramName) {
             case 'delegateType':
@@ -46,6 +56,11 @@ export default class Config {
         return paramData
     }
 
+    /**
+     * Check out validity of http request
+     * @param req - requested body of incoming http request.
+     * @returns {boolean} validity of request
+     */
     public static async isRequestValid(req: any) {
         // @todo: validate the request (ie: authentication, valid user-agent etc.)
 
@@ -59,6 +74,10 @@ export default class Config {
         return true
     }
 
+    /**
+     * Get VeridaDIDRegistry contract deployed on targeting blockchain
+     * @returns {string} Address of VeridaDIDRegistry contract deployed.
+     */
     public static getContractAddress() {
         return "0x2862BC860f55D389bFBd1A37477651bc1642A20B"
     }

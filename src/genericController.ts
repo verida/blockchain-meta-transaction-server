@@ -11,14 +11,26 @@ const logger = log4js.getLogger()
 logger.level = "debug";
 
 // const web3 = new Web3('https://speedy-nodes-nyc.moralis.io/bd1c39d7c8ee1229b16b4a97/bsc/testnet');
+/** Web3 object that will perform contract interaction */
 const web3 = new Web3(process.env.RPC_URL_BSC_TESTNET)
+/** Verida company wallet accoutn that pays for gass fees */
 const { privateKey } = require('../.env.json')
 const { address: admin } = web3.eth.accounts.wallet.add(privateKey)
 
+/** Function parameter type. Defined in config.ts file for each smart contract */
 type fnParameterConfig = (paramName: any, paramData: any) => any
 
+/**
+ * Class that process incoming http requests
+ */
 export default class GenericController {
-
+    /**
+     * Parse parameters from http request body and convert them affordable to smart contract
+     * @param req - HTTP request
+     * @param abiMethod - method infor extracted from contract abi file
+     * @param fnConfig - Function parameter that adjust request parameters affordable to smart contract
+     * @returns 
+     */
     private static parseParams(req:Request, abiMethod:any, fnConfig: fnParameterConfig) : any | never {
         // Loop through all the parameters and convert to the correct type
         const finalParams = {} as any
@@ -53,6 +65,14 @@ export default class GenericController {
         return finalParams
     }
 
+    /**
+     * Perform smart contract interaction
+     * @param abi - Contract abi file
+     * @param address - Contract address deployed on blockchain
+     * @param abiMethod - Method abi extracted from contract abi file
+     * @param finalParams - Parameters that are converted for smart contract interaction
+     * @returns - Transaction response that contains transaction hash
+     */
     private static async callContractFunction(abi: any, address: string, abiMethod: any, finalParams: any) {
         const controller = new web3.eth.Contract(abi, address)
 
@@ -102,9 +122,9 @@ export default class GenericController {
     }
 
     /**
-     * 
-     * @param {*} req 
-     * @param {*} res 
+     * Accept http request and perform smart contract interaction by calling sub functions
+     * @param {*} req - http request object
+     * @param {*} res - http response object
      */
     public static async contract(req: Request, res: Response) {
         const { contract, method } = req.params
