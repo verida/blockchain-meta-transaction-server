@@ -197,7 +197,7 @@ export default class GenericController {
                 success: false,
                 data: {
                     message: 'Invalid Parameters'
-                }
+                } 
             })
         }
         // console.log("Params: ", finalParams)
@@ -215,7 +215,7 @@ export default class GenericController {
                 data: e
             })
         }
-
+``
         return res.status(200).send({
             success: true,
             data: ret // finalParams
