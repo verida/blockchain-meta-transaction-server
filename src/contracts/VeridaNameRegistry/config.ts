@@ -17,7 +17,7 @@ export default class Config {
     }
 
     public static getContractAddress() {
-        return "0x1e48398CB21E4C228De595859598cdE12D1A0435"
+        return "0xC2F8162C8911218D8d052024e36a2a4Af0F3d7d9"
     }
 
 }

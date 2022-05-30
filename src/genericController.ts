@@ -110,12 +110,8 @@ export default class GenericController {
 
                 ret = await web3.eth.sendTransaction(txData)
             } catch(e) {
-                console.log("Failed Transaction: ", e)
-                // return res.status(200).send({
-                //     success: false,
-                //     data: e
-                // })
-                throw new Error()
+                console.log("Failed Transaction: ", e.toString())
+                throw e
             }
         }
         return ret
@@ -147,8 +143,6 @@ export default class GenericController {
             })
         }
 
-        
-
         // console.log("GenericController", "Valid")
 
         // Find method in contract
@@ -172,7 +166,7 @@ export default class GenericController {
 
         if (abiMethod.stateMutability !== 'view') {
             // Check RequestValidity if calling function is not View type.
-            console.log("Checking request validity");
+            // console.log("Checking request validity");
             
             const isValid = await config.isRequestValid(req)
             if (!isValid) {
@@ -209,10 +203,12 @@ export default class GenericController {
         try {
             ret = await GenericController.callContractFunction(abi, address, abiMethod, finalParams)
         } catch(e) {
-            console.log("Failed Transaction: ", e)
+            // console.log("Failed Transaction - : ", e)
             return res.status(200).send({
                 success: false,
-                data: e
+                data: {
+                    message: e.toString()
+                }
             })
         }
 ``
