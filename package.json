@@ -1,10 +1,9 @@
 {
-  "name": "@verida/server-template",
-  "version": "0.0.1",
-  "description": "Verida Server Template",
+  "name": "@verida/meta-transaction-server",
+  "version": "0.1.0-beta",
+  "description": "Verida Meta-Transaction-Server",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "yarn build; nodemon src/server.js",
     "copy": "cd src/contracts && find . -name \"*.json\" | xargs cp --parents -t ../../dist/contracts && cd ../../",
     "build": "rm -rf dist && tsc && yarn copy",
     "prestart": "yarn build",
@@ -14,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/verida/server-template.git"
+    "url": "git+https://github.com/verida/blockchain-meta-transaction-server.git"
   },
   "author": "Verida",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/verida/server-template/issues"
+    "url": "https://github.com/verida/blockchain-meta-transaction-server/issues"
   },
-  "homepage": "https://github.com/verida/server-template#readme",
+  "homepage": "https://github.com/verida/blockchain-meta-transaction-server#readme",
   "dependencies": {
     "@verida/account-node": "^1.1.8",
     "@verida/client-ts": "^1.1.12",
