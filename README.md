@@ -43,7 +43,17 @@ _Ex_: `yarn test tests/vda-did-registry.test.ts`
 ## Hosting server as production
 ### 1. Get ready company wallet account
 To host meta-transaction-server, we need company wallet account that will pay gas fees on meta transactions.
-### 2. Register company wallet account to project
+### 2. Set up configuration
+#### .env - Setup RPC URls
+Need to register RPC ursl of chains.
+```
+...
+RPC_URL_POLYGON_MAINNET="https://polygon-rpc.com"
+RPC_URL_POLYGON_TESTNET="https://rpc-mumbai.maticvigil.com"
+RPC_URL_BSC_TESTNET="https://speedy-nodes-nyc.moralis.io/bd1c39d7c8ee1229b16b4a97/bsc/testnet"
+```
+Need to update rpc urls for targeting block chain. (Line15 : src/genericcontroller.ts)
+#### .env.json - Register company wallet account to project
 Create `.env.json` file inside project directory(meaning "blockchain-meta-transaction-server/").
 Add private key of company wallet account to this file:
 ```
