@@ -1,3 +1,4 @@
+require('dotenv').config()
 
 export default class Config {
 
@@ -24,7 +25,7 @@ export default class Config {
     }
 
     public static getContractAddress() {
-        return "0xC2F8162C8911218D8d052024e36a2a4Af0F3d7d9"
+        return process.env.CONTRACT_ADDRESS_NameRegistry;
     }
 
 }

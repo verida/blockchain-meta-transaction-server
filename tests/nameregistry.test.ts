@@ -20,6 +20,7 @@ import {
 
 import dotenv from 'dotenv'
 import { BigNumberish } from 'ethers'
+import { isTypedArray } from 'util/types'
 dotenv.config()
 
 const SENDER_CONTEXT = 'Verida Test: Any sending app'
@@ -66,11 +67,16 @@ const badSignature = "0xf157fd349172fa8bb84710d871724091947289182373198723918cab
 let server
 
 const testNames = [
-    formatBytes32String("John"),
-    formatBytes32String("Smith Elba"),
-    formatBytes32String("Bill Clin"),
-    formatBytes32String("Jerry Smith"),
+    formatBytes32String("John.verida"),
+    formatBytes32String("Smith Elba.verida"),
+    formatBytes32String("Bill Clin.verida"),
+    formatBytes32String("Jerry Smith.verida"),
+
+    formatBytes32String("Jerry Smith.test"),
+    formatBytes32String("Billy.test"),
   ];
+
+const newSuffix = formatBytes32String("test");
 
 const testDIDs = [
     "0x181aB2d2F0143cd2046253c56379f7eDb1E9C133",
@@ -132,6 +138,18 @@ describe("NameRegistry Tests", function() {
                 }
             )
         })
+
+        it("Should fail - Unregistered suffix", async () => {
+            await checkFunctionCall(
+                'register',
+                false,
+                {
+                    name: formatBytes32String("tester.unknown"),
+                    did: testDIDs[0],
+                    signature: testSignature
+                }
+            )
+        })        
 
         it("Register successfully", async () => {
             await checkFunctionCall(
@@ -278,4 +296,41 @@ describe("NameRegistry Tests", function() {
             }
         })
     })
+    
+    describe("Add suffix", async () => {
+        it ("Add suffix successfully",async () => {
+            /*
+            // This must be called once for test, as there is no removing function
+            // Since 2nd time of this call, it will be rejected by "Already registered"
+            // And this must be called by owner of contract
+            await checkFunctionCall(
+                'addSufix',
+                true,
+                {
+                    suffix: newSuffix,
+                }
+            )
+            */
+    
+            await checkFunctionCall(
+                'register',
+                true,
+                {
+                    name: testNames[4],
+                    did: testDIDs[0],
+                    signature: testSignature
+                }
+            )
+    
+            await checkFunctionCall(
+                'unregister',
+                true,
+                {
+                    name: testNames[4],
+                    did: testDIDs[0],
+                    signature: testSignature
+                }
+            )
+        })
+    })    
 });

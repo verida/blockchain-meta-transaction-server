@@ -1,6 +1,8 @@
 import { BytesLike } from 'ethers';
 import {stringToBytes32} from '../../helpers'
 
+require('dotenv').config()
+
 /** Interface representing parameters to add/revoke delegates operations */
 interface DelegateParamType {
     /** delegate type */
@@ -79,7 +81,7 @@ export default class Config {
      * @returns {string} Address of VeridaDIDRegistry contract deployed.
      */
     public static getContractAddress() {
-        return "0x2862BC860f55D389bFBd1A37477651bc1642A20B"
+        return process.env.CONTRACT_ADDRESS_DidRegistry;
     }
 
 }
