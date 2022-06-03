@@ -3,24 +3,7 @@ import Axios from 'axios'
 import { Network, EnvironmentType, Context } from '@verida/client-ts'
 import { AutoAccount } from '@verida/account-node'
 
-import {
-    arrayify,
-    BytesLike,
-    concat,
-    formatBytes32String,
-    hexConcat,
-    hexlify,
-    hexZeroPad,
-    keccak256,
-    parseBytes32String,
-    SigningKey,
-    toUtf8Bytes,
-    zeroPad,
-  } from 'ethers/lib/utils'
-
 import dotenv from 'dotenv'
-import { BigNumberish } from 'ethers'
-import { isTypedArray } from 'util/types'
 dotenv.config()
 
 const SENDER_CONTEXT = 'Verida Test: Any sending app'
@@ -67,16 +50,16 @@ const badSignature = "0xf157fd349172fa8bb84710d871724091947289182373198723918cab
 let server
 
 const testNames = [
-    formatBytes32String("John.verida"),
-    formatBytes32String("Smith Elba.verida"),
-    formatBytes32String("Bill Clin.verida"),
-    formatBytes32String("Jerry Smith.verida"),
+    "John.verida",
+    "Smith Elba.verida",
+    "Bill Clin.verida",
+    "Jerry Smith.verida",
 
-    formatBytes32String("Jerry Smith.test"),
-    formatBytes32String("Billy.test"),
+    "Jerry Smith.test",
+    "Billy.test",
   ];
 
-const newSuffix = formatBytes32String("test");
+const newSuffix = "test";
 
 const testDIDs = [
     "0x181aB2d2F0143cd2046253c56379f7eDb1E9C133",
@@ -144,7 +127,7 @@ describe("NameRegistry Tests", function() {
                 'register',
                 false,
                 {
-                    name: formatBytes32String("tester.unknown"),
+                    name: "tester.unknown",
                     did: testDIDs[0],
                     signature: testSignature
                 }
