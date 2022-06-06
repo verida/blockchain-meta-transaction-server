@@ -43,24 +43,36 @@ _Ex_: `yarn test tests/vda-did-registry.test.ts`
 ## Hosting server as production
 ### 1. Get ready company wallet account
 To host meta-transaction-server, we need company wallet account that will pay gas fees on meta transactions.
-### 2. Set up configuration
-#### .env - Setup RPC URls
-Need to register RPC ursl of chains.
+### 2. Set up configuration - .env file
+#### Private key
+This is an private key of wallet. This account is in charge of paying fees for transactions.
+We should replace this with private key of company wallet account.
 ```
-...
+PRIVATE_KEY = "35...7de"
+```
+#### Select chains
+```
+RPC_TARGET_NET = "RPC_URL_BSC_TESTNET"
 RPC_URL_POLYGON_MAINNET="https://polygon-rpc.com"
 RPC_URL_POLYGON_TESTNET="https://rpc-mumbai.maticvigil.com"
 RPC_URL_BSC_TESTNET="https://speedy-nodes-nyc.moralis.io/bd1c39d7c8ee1229b16b4a97/bsc/testnet"
 ```
-Need to update rpc urls for targeting block chain. (Line15 : src/genericcontroller.ts)
-#### .env.json - Register company wallet account to project
-Create `.env.json` file inside project directory(meaning "blockchain-meta-transaction-server/").
-Add private key of company wallet account to this file:
+`RPC_TARGET_NET` is the chain that this server send transactions. The value must be one of following:
 ```
-{
-    "privateKey" : "355...de"
-}
+RPC_URL_POLYGON_MAINNET
+RPC_URL_POLYGON_TESTNET
+RPC_URL_BSC_TESTNET
 ```
+#### Contract addresses
+You can add contract addresses deployed on chains.
+We should follow this rule when creating contract variables:
+- variable name must have prefix of `CONTRACT_ADDRESS_`.
+- After prefix, specify chain name. And this chain name must be existed in the `.env` file.
+    ex: `RPC_URL_POLYGON_MAINNET`
+- Finally specify contract name.
+    ex: `DidRegistry`
+
+ex: `CONTRACT_ADDRESS_RPC_URL_BSC_TESTNET_DidRegistry = "0x2862BC860f55D389bFBd1A37477651bc1642A20B"` this variable is pointing VeridaDidRegistry contract deployed on BSC testnet.
 
 # VDA-DID-Registry contract
 All end-points for VDA-DID-Registry contracts has prefix of "/VeridaDIDRegistry" in its path: 
