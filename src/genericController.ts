@@ -2,17 +2,21 @@ import { Console } from 'console';
 import { Request, Response } from 'express'
 import Web3 from 'web3'
 
+import { getCurrentNet, getRPCURLofNet } from './helpers'
+
 require('dotenv').config()
 
 const log4js = require("log4js")
 const logger = log4js.getLogger()
 logger.level = "debug";
 
-// const web3 = new Web3('https://speedy-nodes-nyc.moralis.io/bd1c39d7c8ee1229b16b4a97/bsc/testnet');
+const targetNet = getCurrentNet();
+const rpcURL = getRPCURLofNet(targetNet);
+
 /** Web3 object that will perform contract interaction */
-const web3 = new Web3(process.env.RPC_URL_BSC_TESTNET)
+const web3 = new Web3(rpcURL)
 /** Verida company wallet accoutn that pays for gass fees */
-const { privateKey } = require('../.env.json')
+const privateKey = process.env.PRIVATE_KEY;
 const { address: admin } = web3.eth.accounts.wallet.add(privateKey)
 
 /** Function parameter type. Defined in config.ts file for each smart contract */

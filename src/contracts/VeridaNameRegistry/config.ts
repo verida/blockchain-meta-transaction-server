@@ -1,4 +1,5 @@
 require('dotenv').config()
+import {getCurrentNet} from '../../helpers'
 
 export default class Config {
 
@@ -25,7 +26,12 @@ export default class Config {
     }
 
     public static getContractAddress() {
-        return process.env.CONTRACT_ADDRESS_NameRegistry;
+        const netName = getCurrentNet();
+        const address = eval(`process.env.CONTRACT_ADDRESS_${netName}_NameRegistry`);
+        if (address == undefined) {
+            throw new Error("No contract address in .env file.")
+        }
+        return address;
     }
 
 }

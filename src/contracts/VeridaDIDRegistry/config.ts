@@ -1,5 +1,5 @@
 import { BytesLike } from 'ethers';
-import {stringToBytes32} from '../../helpers'
+import {stringToBytes32, getCurrentNet} from '../../helpers'
 
 require('dotenv').config()
 
@@ -81,7 +81,12 @@ export default class Config {
      * @returns {string} Address of VeridaDIDRegistry contract deployed.
      */
     public static getContractAddress() {
-        return process.env.CONTRACT_ADDRESS_DidRegistry;
+        const netName = getCurrentNet();
+        const address = eval(`process.env.CONTRACT_ADDRESS_${netName}_DidRegistry`);
+        if (address == undefined) {
+            throw new Error("No contract address in .env file.")
+        }
+        return address;
     }
 
 }

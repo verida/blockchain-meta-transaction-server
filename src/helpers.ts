@@ -3,6 +3,31 @@ import * as base64 from '@ethersproject/base64'
 import { Base58 } from '@ethersproject/basex'
 import { toUtf8Bytes } from '@ethersproject/strings'
 
+require('dotenv').config()
+
+/**
+ * Get targeting net name of this server.
+ * Read value from .env file.
+ * @returns Blockchain name
+ */
+export function getCurrentNet() {
+  const defaultNet = "RPC_URL_POLYGON_MAINNET";
+  return process.env.RPC_TARGET_NET != undefined ? process.env.RPC_TARGET_NET :  defaultNet;
+}
+
+/**
+ * Get RPC URL of chain.
+ * Read value from .env file.
+ * @param net Blockchain name
+ * @returns 
+ */
+export function getRPCURLofNet(net : string) {
+  const defaultNetURL = "https://polygon-rpc.com";
+  let rpcURL = eval(`process.env.${net}`);
+  rpcURL = rpcURL != undefined ? rpcURL : defaultNetURL;
+  return rpcURL;
+}
+
 /**
  * Convert string to Bytes32
  * @param str - Input string
