@@ -61,7 +61,7 @@ export default class GenericController {
                 finalParams[param.name as string] = fnConfig(param.name, paramData)
             })
         } catch(e) {
-            console.log("Parsing Error", e)
+            // console.log("Parsing Error", e)
             throw new Error()
         }
         return finalParams
@@ -112,7 +112,7 @@ export default class GenericController {
 
                 ret = await web3.eth.sendTransaction(txData)
             } catch(e) {
-                console.log("Failed Transaction: ", e.toString())
+                // console.log("Failed Transaction: ", e.toString())
                 throw e
             }
         }
@@ -188,7 +188,7 @@ export default class GenericController {
         try {
             finalParams = GenericController.parseParams(req, abiMethod, config.customParams)
         } catch (e) {
-            console.log("***ParseParam Failed", e)
+            // console.log("***ParseParam Failed", e)
             return res.status(200).send({
                 success: false,
                 data: {

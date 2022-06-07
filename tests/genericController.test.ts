@@ -512,6 +512,7 @@ describe("Generic Server Tests", function() {
                     false                
                 )
             })
+            
             describe("Correct signature",async () => {
                 it ("Failed because of inavlid arguments", async() => {
                     const response: any = await server.post(
