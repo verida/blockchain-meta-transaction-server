@@ -83,12 +83,14 @@ export default class GenericController {
         if (abiMethod.stateMutability === 'view') {
             // View Function
             // console.log("values = ", ...(Object.values(finalParams)))
-            ret = await eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams))).call()`)
+            // ret = await eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams))).call()`)
+            ret = await controller.methods[abiMethod.name](...(Object.values(finalParams))).call()
         } 
         else {
             // Make transaction
             try {
-                const tx = eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams)))`)
+                // const tx = eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams)))`)
+                const tx = controller.methods[abiMethod.name](...(Object.values(finalParams)))
 
                 // console.log("Sending Params: ", finalParams)
 

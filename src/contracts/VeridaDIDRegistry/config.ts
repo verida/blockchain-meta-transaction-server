@@ -82,7 +82,7 @@ export default class Config {
      */
     public static getContractAddress() {
         const netName = getCurrentNet();
-        const address = eval(`process.env.CONTRACT_ADDRESS_${netName}_DidRegistry`);
+        const address = process.env[`CONTRACT_ADDRESS_${netName}_DidRegistry`];
         if (address == undefined) {
             throw new Error("No contract address in .env file.")
         }
