@@ -23,7 +23,7 @@ export function getCurrentNet() {
  */
 export function getRPCURLofNet(net : string) {
   const defaultNetURL = "https://polygon-rpc.com";
-  let rpcURL = eval(`process.env.${net}`);
+  let rpcURL = process.env[net];
   rpcURL = rpcURL != undefined ? rpcURL : defaultNetURL;
   return rpcURL;
 }
