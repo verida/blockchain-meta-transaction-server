@@ -1,14 +1,24 @@
 service: blockchain-meta-transaction-server
- 
+
+custom:
+  stage: ${opt:stage, 'testnet'}
+  region: ${opt:region, 'us-east-1'}
+
 provider:
   name: aws
-  runtime: nodejs14
-  stage: testnet
-  region: us-east-1
+  runtime: nodejs14.x
+  logs:
+    httpApi: true
+  httpApi:
+    metrics: true
+    cors: true
  
 functions:
-  contract:
+  useContract:
     handler: server.handler
     events:
-      - http: ANY /
-      - http: 'ANY {proxy+}'
+      - httpApi:
+          path: '/{proxy+}'
+          method: '*'
+plugins:
+  - serverless-dotenv-plugin
