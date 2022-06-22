@@ -3,6 +3,9 @@ service: blockchain-meta-transaction-server
 custom:
   stage: ${opt:stage, 'testnet'}
   region: ${opt:region, 'us-east-1'}
+  serverless-offline:
+    httpPort: 5021
+    noPrependStageInUrl: true
 
 provider:
   name: aws
@@ -15,10 +18,11 @@ provider:
  
 functions:
   useContract:
-    handler: server.handler
+    handler: dist/server.handler
     events:
       - httpApi:
           path: '/{proxy+}'
           method: '*'
 plugins:
   - serverless-dotenv-plugin
+  - serverless-offline

@@ -35,11 +35,6 @@ app.use(router)
 /**
  * EndPoints for APIs
  */
-app.get('/', (req, res) => res.send('Welcome to Verida-DID-Registry API!'));
-
-// const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-// app.listen(PORT, () => {
-//   console.log(`server running on port ${PORT}`)
-// });
+app.get('/', (req, res) => res.send('Welcome to Verida-DID-Registry API!'))
 
 export const handler = serverless(app)
