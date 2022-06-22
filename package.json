@@ -4,8 +4,7 @@
   "description": "Verida Meta-Transaction-Server",
   "main": "dist/server.js",
   "scripts": {
-    "copy": "cd src/contracts && find . -name \"*.json\" | xargs cp --parents -t ../../dist/contracts && cd ../../",
-    "build": "rm -rf dist && tsc && yarn copy",
+    "build": "rm -rf dist && tsc",
     "prestart": "yarn build",
     "start": "node dist/server.js",
     "tests": "ts-mocha './tests/**/*.ts'",
