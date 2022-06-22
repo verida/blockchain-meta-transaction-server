@@ -1,4 +1,5 @@
 import express from 'express'
+import serverless from 'serverless-http'
 const cors = require('cors')
 import bodyParser from 'body-parser'
 import router from './routes'
@@ -36,7 +37,9 @@ app.use(router)
  */
 app.get('/', (req, res) => res.send('Welcome to Verida-DID-Registry API!'));
 
-const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-app.listen(PORT, () => {
-  console.log(`server running on port ${PORT}`)
-});
+// const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
+// app.listen(PORT, () => {
+//   console.log(`server running on port ${PORT}`)
+// });
+
+export const handler = serverless(app)

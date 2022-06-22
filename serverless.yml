@@ -1,0 +1,14 @@
+service: blockchain-meta-transaction-server
+ 
+provider:
+  name: aws
+  runtime: nodejs14
+  stage: testnet
+  region: us-east-1
+ 
+functions:
+  contract:
+    handler: server.handler
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
