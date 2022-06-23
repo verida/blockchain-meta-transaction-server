@@ -235,6 +235,18 @@ describe("Generic Server Tests", function() {
     */
     
     describe("Http POST requests test",async () => {
+        describe("changed() - Test for storage variable", async () => {
+            it("Call success",async () => {
+                const response = await server.post(
+                    SERVER_URL + "/changed",
+                    {
+                        '' : identity
+                    },
+                    auth_header
+                )
+                console.log("Changed = ", response)
+            }) 
+        })
 
         describe("changeOwner()",async () => {
             describe("Correct Signature", async () => {
