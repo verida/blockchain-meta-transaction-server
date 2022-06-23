@@ -45,7 +45,11 @@ jobs:
           node-version: '${{ steps.nvmrc.outputs.node_version }}'
           cache: 'yarn'
           
-      - run: yarn install  
+      - run: yarn install
+      - run: yarn build
       
       # do testnet deployment
-      - run: yarn deploy
+      - name: Serverless deploy
+        uses: serverless/github-action@v3.1
+        with: 
+          args: deploy --stage=testnet
