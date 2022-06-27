@@ -42,7 +42,7 @@ const getAxios = async () => {
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
 const SERVER_URL_HOME = `http://localhost:${PORT}`
-const SERVER_URL = `http://localhost:${PORT}/VeridaNameRegistry`
+const SERVER_URL = `http://localhost:${PORT}/NameRegistry`
 
 const testSignature = "0x67de2d20880a7d27b71cdcb38817ba95800ca82dff557cedd91b96aacb9062e80b9e0b8cb9614fd61ce364502349e9079c26abaa21890d7bc2f1f6c8ff77f6261c"
 const badSignature = "0xf157fd349172fa8bb84710d871724091947289182373198723918cabcc888ef888ff8876956050565d5757a57d868b8676876e7678687686f95419238191488923"

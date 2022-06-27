@@ -240,11 +240,11 @@ describe("Generic Server Tests", function() {
                 const response = await server.post(
                     SERVER_URL + "/changed",
                     {
-                        '' : identity
+                        'param_1' : identity
                     },
                     auth_header
                 )
-                console.log("Changed = ", response)
+                console.log("Changed = ", response.data)
             }) 
         })
 

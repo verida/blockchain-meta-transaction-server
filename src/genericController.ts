@@ -35,8 +35,9 @@ export default class GenericController {
      */
     private static parseParams(req:Request, abiMethod:any, fnConfig: fnParameterConfig) : any | never {
         // Loop through all the parameters and convert to the correct type
-        const finalParams = {} as any
+        const finalParams :  any[]= [];
         try {
+            let paramIndex = 1;
             abiMethod.inputs.forEach((param: any) => {
                 // console.log(param)
                 let paramData : any
@@ -58,7 +59,12 @@ export default class GenericController {
                     }
                         
                 }
-                finalParams[param.name as string] = fnConfig(param.name, paramData)
+                if (param.name === '') {
+                    paramData = req.body['param_' + paramIndex]
+                    paramIndex++;
+                }
+                finalParams.push(fnConfig(param.name, paramData))
+                // finalParams[param.name as string] = fnConfig(param.name, paramData)
             })
         } catch(e) {
             // console.log("Parsing Error", e)
@@ -84,13 +90,15 @@ export default class GenericController {
             // View Function
             // console.log("values = ", ...(Object.values(finalParams)))
             // ret = await eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams))).call()`)
-            ret = await controller.methods[abiMethod.name](...(Object.values(finalParams))).call()
+
+            // ret = await controller.methods[abiMethod.name](...(Object.values(finalParams))).call()
+            ret = await controller.methods[abiMethod.name](...finalParams).call()
         } 
         else {
             // Make transaction
             try {
                 // const tx = eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams)))`)
-                const tx = controller.methods[abiMethod.name](...(Object.values(finalParams)))
+                const tx = controller.methods[abiMethod.name](...finalParams)
 
                 // console.log("Sending Params: ", finalParams)
 
