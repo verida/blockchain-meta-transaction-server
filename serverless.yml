@@ -1,0 +1,38 @@
+service: blockchain-meta-transaction-server
+
+custom:
+  stage: ${opt:stage, 'testnet'}
+  region: ${opt:region, 'us-east-1'}
+  serverless-offline:
+    httpPort: 5021
+    noPrependStageInUrl: true
+  customDomain:
+    domainName: meta-tx-server1.tn.verida.tech 
+    basePath: ''
+    certificateName: '*.tn.verida.tech'
+    stage: ${self:custom.stage}                                          
+    endpointType: regional
+    createRoute53Record: true
+    apiType: http
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  endpointType: regional
+  logs:
+    httpApi: true
+  httpApi:
+    metrics: true
+    cors: true
+ 
+functions:
+  useContract:
+    handler: dist/server.handler
+    events:
+      - httpApi:
+          path: '/{proxy+}'
+          method: '*'
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+  - serverless-domain-manager

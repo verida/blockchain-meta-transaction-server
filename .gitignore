@@ -1,4 +1,7 @@
 node_modules
 coverage
-.env.dev
+.env.*
+!.env.example
 dist/
+*.log
+.serverless/
