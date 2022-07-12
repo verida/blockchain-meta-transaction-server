@@ -1,8 +1,10 @@
 import { Console } from 'console';
 import { Request, Response } from 'express'
-import Web3 from 'web3'
-
 import { getCurrentNet, getRPCURLofNet } from './helpers'
+
+import { ContractFactory } from '@ethersproject/contracts'
+import { JsonRpcProvider } from '@ethersproject/providers';
+import { Wallet } from '@ethersproject/wallet'
 
 require('dotenv').config()
 
@@ -10,14 +12,14 @@ const log4js = require("log4js")
 const logger = log4js.getLogger()
 logger.level = "debug";
 
+/** Verida company wallet accoutn that pays for gass fees */
+const privateKey = process.env.PRIVATE_KEY;
+
 const targetNet = getCurrentNet();
 const rpcURL = getRPCURLofNet(targetNet);
 
-/** Web3 object that will perform contract interaction */
-const web3 = new Web3(rpcURL)
-/** Verida company wallet accoutn that pays for gass fees */
-const privateKey = process.env.PRIVATE_KEY;
-const { address: admin } = web3.eth.accounts.wallet.add(privateKey)
+const provider = new JsonRpcProvider(rpcURL);
+const txSigner = new Wallet(privateKey, provider)
 
 /** Function parameter type. Defined in config.ts file for each smart contract */
 type fnParameterConfig = (paramName: any, paramData: any) => any
@@ -82,50 +84,29 @@ export default class GenericController {
      * @returns - Transaction response that contains transaction hash
      */
     private static async callContractFunction(abi: any, address: string, abiMethod: any, finalParams: any) {
-        const controller = new web3.eth.Contract(abi, address)
-
+        const contract = ContractFactory.fromSolidity(abi)
+            .attach(address)
+            .connect(provider)
+            .connect(txSigner)
         let ret;
 
-        if (abiMethod.stateMutability === 'view') {
-            // View Function
-            // console.log("values = ", ...(Object.values(finalParams)))
-            // ret = await eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams))).call()`)
-
-            // ret = await controller.methods[abiMethod.name](...(Object.values(finalParams))).call()
-            ret = await controller.methods[abiMethod.name](...finalParams).call()
-        } 
-        else {
-            // Make transaction
-            try {
-                // const tx = eval(`controller.methods.${abiMethod.name}(...(Object.values(finalParams)))`)
-                const tx = controller.methods[abiMethod.name](...finalParams)
-
-                // console.log("Sending Params: ", finalParams)
-
-                // const [gasPrice, gasCost] = await Promise.all([web3.eth.getGasPrice(), tx.estimateGas({ from: admin })])
-                const gasPrice = await web3.eth.getGasPrice()
-                let gasCost = await tx.estimateGas({ from: admin })
-                gasCost += 100
-
-                // const gasPrice = 10000000000
-                // const gasCost = 100000
-
-                const data = tx.encodeABI()
-
-                const txData = {
-                    from: admin,
-                    to: controller.options.address,
-                    data,
-                    gas: gasCost,
-                    gasPrice,
-                }
-
-                ret = await web3.eth.sendTransaction(txData)
-            } catch(e) {
-                // console.log("Failed Transaction: ", e.toString())
-                throw e
+        try {
+            if (abiMethod.stateMutability === 'view') {
+                // View Function
+                ret = await contract.functions[abiMethod.name](...finalParams)
+            } 
+            else {
+                // Make transaction
+                const transaction = await contract.functions[abiMethod.name](...finalParams)
+                
+                ret = await transaction.wait()
+                // console.log(transaction) // - transaction
+                // console.log(ret) // - transactionReceipt
             }
+        } catch(e:any) {
+            throw e
         }
+
         return ret
     }
 
@@ -213,7 +194,7 @@ export default class GenericController {
 
         let ret;
         try {
-            ret = await GenericController.callContractFunction(abi, address, abiMethod, finalParams)
+            ret = await GenericController.callContractFunction(contractJson, address, abiMethod, finalParams)
         } catch(e) {
             // console.log("Failed Transaction - : ", e)
             return res.status(200).send({
