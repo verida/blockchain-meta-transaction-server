@@ -93,7 +93,7 @@ export default class GenericController {
         try {
             if (abiMethod.stateMutability === 'view') {
                 // View Function
-                ret = await contract.functions[abiMethod.name](...finalParams)
+                ret = await contract.callStatic[abiMethod.name](...finalParams)
             } 
             else {
                 // Make transaction
@@ -127,12 +127,10 @@ export default class GenericController {
             config = (await import(`./contracts/${contract}/config`)).default
             // console.log("GenericController config = ", config)
         } catch (e) {
+            
             return res.status(400).send({
-                // status: "fail",
                 success: false,
-                data: {
-                    message: 'Invalid contract'
-                }
+                error: 'Invalid contract'
             })
         }
 
@@ -151,9 +149,7 @@ export default class GenericController {
         if (!abiMethod) {
             return res.status(400).send({
                 success: false,
-                data: {
-                    message: 'Method not found on contract'
-                }
+                error: 'Method not found on contract'
             })
         }
 
@@ -166,9 +162,7 @@ export default class GenericController {
                 return res.status(400).send({
                     // status: "fail",
                     success: false,
-                    data: {
-                        message: 'Permission denied for this request'
-                    }
+                    error: 'Permission denied for this request'
                 })
             }
         }
@@ -182,9 +176,7 @@ export default class GenericController {
             // console.log("***ParseParam Failed", e)
             return res.status(200).send({
                 success: false,
-                data: {
-                    message: 'Invalid Parameters'
-                } 
+                error: 'Invalid Parameters'
             })
         }
         // console.log("Params: ", finalParams)
@@ -199,9 +191,7 @@ export default class GenericController {
             // console.log("Failed Transaction - : ", e)
             return res.status(200).send({
                 success: false,
-                data: {
-                    message: e.toString()
-                }
+                error: e.toString()
             })
         }
 ``
