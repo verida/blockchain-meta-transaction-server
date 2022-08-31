@@ -5,6 +5,7 @@ import { getCurrentNet, getRPCURLofNet } from './helpers'
 import { ContractFactory } from '@ethersproject/contracts'
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet'
+import { BigNumber } from 'ethers';
 
 require('dotenv').config()
 
@@ -65,8 +66,8 @@ export default class GenericController {
                     paramData = req.body['param_' + paramIndex]
                     paramIndex++;
                 }
-                finalParams.push(fnConfig(param.name, paramData))
-                // finalParams[param.name as string] = fnConfig(param.name, paramData)
+                // finalParams.push(fnConfig(param.name, paramData))
+                finalParams.push(paramData)
             })
         } catch(e) {
             // console.log("Parsing Error", e)
@@ -90,6 +91,9 @@ export default class GenericController {
             .connect(txSigner)
         let ret;
 
+        console.log('Calling - ', abiMethod.name)
+        console.log('Calling - ', finalParams)
+
         try {
             if (abiMethod.stateMutability === 'view') {
                 // View Function
@@ -106,6 +110,9 @@ export default class GenericController {
         } catch(e:any) {
             throw e
         }
+
+        if (BigNumber.isBigNumber(ret))
+            ret = ret.toNumber()
 
         return ret
     }
