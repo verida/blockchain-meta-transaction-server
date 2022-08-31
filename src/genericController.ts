@@ -90,10 +90,7 @@ export default class GenericController {
             .connect(provider)
             .connect(txSigner)
         let ret;
-
-        console.log('Calling - ', abiMethod.name)
-        console.log('Calling - ', finalParams)
-
+        
         try {
             if (abiMethod.stateMutability === 'view') {
                 // View Function

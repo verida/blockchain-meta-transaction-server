@@ -4,12 +4,12 @@
   "description": "Verida Meta-Transaction-Server",
   "main": "dist/server.js",
   "scripts": {
-    "copy": "cd src/contracts && find . -name \"*.json\" | xargs cp --parents -t ../../dist/contracts && cd ../../",
-    "build": "rm -rf dist && tsc && yarn copy",
+    "build": "rm -rf dist && tsc",
     "prestart": "yarn build",
-    "start": "node dist/server.js",
+    "start": "sls offline start --stage offline",
     "tests": "ts-mocha './tests/**/*.ts'",
-    "test": "ts-mocha --timeout 1000000"
+    "test": "ts-mocha --timeout 100000",
+    "deploy": "sls deploy --stage testnet"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
   "homepage": "https://github.com/verida/blockchain-meta-transaction-server#readme",
   "dependencies": {
     "@verida/account-node": "^1.1.8",
-    "@verida/client-ts": "^1.1.12",
+    "@verida/client-ts": "^1.1.15",
     "@verida/did-client": "^0.1.7",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -34,7 +34,9 @@
     "memory-cache": "^0.2.0",
     "mocha": "^9.2.1",
     "nano": "^9.0.5",
-    "ts-mocha": "^9.0.2"
+    "serverless-http": "^3.0.1",
+    "ts-mocha": "^9.0.2",
+    "web3": "^1.7.3"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
@@ -42,6 +44,10 @@
     "ethereum-public-key-to-address": "^0.0.5",
     "ethers": "^5.6.5",
     "nodemon": "^2.0.14",
+    "serverless": "^3.22.0",
+    "serverless-domain-manager": "^6.0.3",
+    "serverless-dotenv-plugin": "^4.0.1",
+    "serverless-offline": "^8.8.0",
     "typescript": "^4.4.4"
   }
 }
