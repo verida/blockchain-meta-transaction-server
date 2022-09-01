@@ -41,7 +41,6 @@
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.31",
-    "ethereum-public-key-to-address": "^0.0.5",
     "ethers": "^5.6.5",
     "nodemon": "^2.0.14",
     "serverless": "^3.22.0",

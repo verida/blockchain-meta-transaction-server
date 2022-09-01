@@ -18,8 +18,6 @@ import {
     DelegateType
 } from './const'
 
-const publicKeyToAddress = require('ethereum-public-key-to-address')
-
 const SENDER_CONTEXT = 'Verida Test: Any sending app'
 
 const getAxios = async () => {
@@ -345,11 +343,11 @@ describe("Generic Server Tests", function() {
 
         describe('attribute test', async () => {
             const attribute = attributes[0]
-            const attributeName = stringToBytes32(attribute.name)
-            const attributeValue = attributeToHex(attribute.name, attribute.value)
+            const attributeName = stringToBytes32(<string>attribute.name)
+            const attributeValue = attributeToHex(<string>attribute.name, attribute.value)
 
             const publicKey = pubKeyList[0]
-            const providerAddress = publicKeyToAddress(publicKey)
+            const providerAddress = ethers.utils.computeAddress(publicKey)
             
             const rawProof = ethers.utils.solidityPack(
                 ['address', 'address'],
@@ -456,7 +454,7 @@ describe("Generic Server Tests", function() {
         describe("bulk test", async () => {
 
             const publicKey = pubKeyList[0]
-            const providerAddress = publicKeyToAddress(publicKey)
+            const providerAddress = ethers.utils.computeAddress(publicKey)
 
             const rawProof = ethers.utils.solidityPack(
                 ['address', 'address'],
