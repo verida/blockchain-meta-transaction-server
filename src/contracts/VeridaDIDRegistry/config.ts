@@ -26,6 +26,7 @@ export default class Config {
      * @returns adjusted parameter value
      */
     public static customParams(paramName: any, paramData: any) {
+        /*
         switch(paramName) {
             case 'delegateType':
                 paramData = stringToBytes32(paramData as string)
@@ -48,7 +49,7 @@ export default class Config {
                     value: item.value.startsWith('0x') ? item.value : '0x' + Buffer.from(item.value, 'utf-8').toString('hex')
                 }))
                 break;
-        }
+        }*/
 
         // console.log('---------------')
         // console.log(paramName)

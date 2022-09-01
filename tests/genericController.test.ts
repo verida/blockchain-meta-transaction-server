@@ -1,26 +1,22 @@
 const assert = require("assert")
 import Axios from 'axios'
-import { Network, EnvironmentType, Context } from '@verida/client-ts'
-import { AutoAccount } from '@verida/account-node'
-
-import {
-    arrayify,
-    BytesLike,
-    concat,
-    formatBytes32String,
-    hexConcat,
-    hexlify,
-    hexZeroPad,
-    keccak256,
-    parseBytes32String,
-    SigningKey,
-    toUtf8Bytes,
-    zeroPad,
-  } from 'ethers/lib/utils'
 
 import dotenv from 'dotenv'
-import { BigNumberish } from 'ethers'
+import { ethers, Wallet } from 'ethers'
 dotenv.config()
+
+import {
+    getVeridaSign, 
+    getVeridaSignWithNonce, 
+    badSigner, 
+    delegates, 
+    attributes, 
+    attributeToHex, 
+    stringToBytes32, 
+    pubKeyList,
+    AttributeType,
+    DelegateType
+} from './const'
 
 const SENDER_CONTEXT = 'Verida Test: Any sending app'
 
@@ -61,22 +57,6 @@ const SERVER_URL_HOME = `http://localhost:${PORT}`
 const SERVER_URL = `http://localhost:${PORT}/VeridaDIDRegistry`
 
 
-const identity = "0x268c970A5FBFdaFfdf671Fa9d88eA86Ee33e14B1"
-const identity2 = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
-const delegate = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
-const delegate2 = "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
-const delegate3 = "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"
-const badBoy = "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc"
-
-const delegateType = formatBytes32String("attestor")
-const validity = 86400
-
-const attributeName = formatBytes32String("encryptionKey")
-const attributeValue = formatBytes32String("encryptionKey")
-
-const testSignature = "0x67de2d20880a7d27b71cdcb38817ba95800ca82dff557cedd91b96aacb9062e80b9e0b8cb9614fd61ce364502349e9079c26abaa21890d7bc2f1f6c8ff77f6261c"
-const badSignature = "0xf157fd349172fa8bb84710d871724091947289182373198723918cabcc888ef888ff8876956050565d5757a57d868b8676876e7678687686f95419238191488923"
-
 let server
 
 const checkOwnerPOST = async (identity:String, owner: string) => {
@@ -112,62 +92,6 @@ function sleep(ms) {
     });
 }
 
-// Params for bulk transaction
-const delegateParams : {
-    delegateType: BytesLike;
-    delegate: string;
-    validity: BigNumberish
-}[] = []
-
-const attributeParams : {
-    name: BytesLike;
-    value: BytesLike;
-    validity: BigNumberish;
-}[] = []
-
-delegateParams.push({
-    delegateType: formatBytes32String("bulktest-1"),
-    delegate: delegate3,
-    validity: 86400
-})
-
-delegateParams.push({
-    delegateType: formatBytes32String("bulktest-2"),
-    delegate: delegate2,
-    validity: 86400
-})
-
-attributeParams.push({
-    name: formatBytes32String("encryptionKey"),
-    value: "0x12345678",
-    validity: 86400
-})
-
-const revokeDelegateParams : {
-    delegateType: BytesLike;
-    delegate: string;
-}[] = []
-
-const revokeAttributeParams : {
-    name: BytesLike;
-    value: BytesLike;
-}[] = []
-
-revokeDelegateParams.push({
-    delegateType: formatBytes32String("bulktest-1"),
-    delegate: delegate3,
-})
-
-revokeDelegateParams.push({
-    delegateType: formatBytes32String("bulktest-2"),
-    delegate: delegate2,
-})
-
-revokeAttributeParams.push({
-    name: formatBytes32String("encryptionKey"),
-    value: "0x12345678",
-})
-
 // Authentication header for http requests
 const auth_header = {
     headers: {
@@ -175,6 +99,28 @@ const auth_header = {
     }
 }
 
+let privateKey = process.env.PRIVATE_KEY
+if (privateKey === undefined) {
+    throw new Error('Define PRIVATE_KEY in .env file')
+}
+const did = new Wallet(privateKey!).address
+if (!privateKey.startsWith('0x'))
+    privateKey = '0x' + privateKey
+
+
+
+const getNonce = async (did: string) => {
+    const response: any = await server.post(
+        SERVER_URL + "/getNonce", 
+        {
+            did,
+        }, 
+        auth_header                        
+    )
+    if (!response.data.success)
+        return ''
+    return response.data.data
+}
 
 describe("Generic Server Tests", function() {
     before(async () =>{
@@ -182,69 +128,40 @@ describe("Generic Server Tests", function() {
         server = await getAxios()
     })
 
-
-    /*
-    // Testing while development
-    describe("Develop Testing", async() => {
-        // it("bulkAdd success", async() => {
-        //     const response: any = await server.post(
-        //         SERVER_URL + "/bulkAdd", 
-        //         {
-        //             identity: identity,
-        //             delegateParams: JSON.stringify(delegateParams),
-        //             attributeParams: JSON.stringify(attributeParams),
-        //             signature: testSignature 
-        //         })
-        //     console.log("bulkAdd Response:", response)
-        //     // assert.ok(response && response.data, 'Have a response')    
-        //     // assert.equal(response.data.success, true, 'Have a success response')
-        // })
-
-        it("identityOwner", async () => {                   
-            const response: any = await server.post(
-                SERVER_URL + "/identityOwner", 
-                {
-                    identity: identity
-                }
-            )
-    
-            // assert.ok(response && response.data, 'Have a response')
-            // assert.equal(response.data.success, true, 'Have a success response')
-    
-            console.log("Response", response)
-            
+    describe("Http POST requests test", async () => {
+        describe("changed() - Test for storage variable", async () => {
+            it("Call success",async () => {
+                const response = await server.post(
+                    SERVER_URL + "/changed",
+                    {
+                        'param_1' : did
+                    },
+                    auth_header
+                )
+                // console.log("Changed = ", response.data)
+            }) 
         })
-
-        it("changeOwner", async () => {                
-            const response: any = await server.post(
-                SERVER_URL + "/changeOwner", 
-                {
-                    identity: identity,
-                    newOwner: delegate,
-                    signature: testSignature
-                }, auth_header
-            )
         
-            // assert.ok(response && response.data, 'Have a response')
-            // assert.equal(response.data.success, true, 'Have a success response')
-    
-            console.log("Response", response)
-            
-        })
-    })
-    */
-    
-    describe("Http POST requests test",async () => {
-
         describe("changeOwner()",async () => {
+            const identity1 = Wallet.createRandom();
+            const identity2 = Wallet.createRandom();
+            const identity3 = Wallet.createRandom();
+
+            const did = identity1.address
+            
             describe("Correct Signature", async () => {
-                it("Change Success", async () => {                
+                it("Change Success", async () => {
+                    const rawMsg = ethers.utils.solidityPack(
+                        ['address', 'address'],
+                        [did, identity2.address]
+                    )
+                    const signature = getVeridaSignWithNonce(rawMsg, identity1.privateKey, await getNonce(did))
                     const response: any = await server.post(
                         SERVER_URL + "/changeOwner", 
                         {
-                            identity: identity,
-                            newOwner: delegate,
-                            signature: testSignature
+                            identity: did,
+                            newOwner: identity2.address,
+                            signature
                         }, 
                         auth_header                        
                     )
@@ -257,37 +174,28 @@ describe("Generic Server Tests", function() {
 
                 it("Identity Changed correctly", async () => {
                     await sleep(1000)
-                    await checkOwnerPOST(identity, delegate)
-                })
-
-                it("Restore owner of identity for another test", async () => {
-                    await sleep(1000)
-                    const response: any = await server.post(
-                        SERVER_URL + "/changeOwner", 
-                        {
-                            identity: identity,
-                            newOwner: identity,
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    // console.log("Response", response)
-                    assert.ok(response && response.data, 'Have a response')   
-                    assert.equal(response.data.success, true, 'Have a success response')
-                    await checkOwnerPOST(identity, identity)
+                    await checkOwnerPOST(did, identity2.address)
                 })
             });
 
             describe("Bad Signature", async () => {
                 it("Should Fail", async () => {
                     await sleep(1000)
+                    const rawMsg = ethers.utils.solidityPack(
+                        ['address', 'address'],
+                        [did, identity3.address]
+                    )
+                    // Owner of DID is identity2
+                    const signature = getVeridaSignWithNonce(rawMsg, identity3.privateKey, await getNonce(did))
                     const response: any = await server.post(
                         SERVER_URL + "/changeOwner", 
                         {
-                            identity: identity,
-                            newOwner: delegate,
-                            signature: badSignature 
-                        },
-                        auth_header)
+                            identity: did,
+                            newOwner: identity2.address,
+                            signature
+                        }, 
+                        auth_header                        
+                    )
                     assert.ok(response && response.data, 'Have a response')
         
                     // console.log("Response", response)
@@ -296,403 +204,518 @@ describe("Generic Server Tests", function() {
                 })
             });
         })
-        
-        describe("addDelegate()", async() => {
-            it("validDelegate should be false", async () => {
-                await sleep(1000)
-                await checkValidDelegatePOST(
-                    identity,
-                    delegateType,
-                    delegate3,
-                    false
+
+        describe("delegate test", async () => {
+            const delegate = delegates[0]
+            describe("addDelegate()", async() => {
+                const getDelegateSignature = async (key: string) => {
+                    const nonce = await getNonce(did)
+    
+                    const rawMsg = ethers.utils.solidityPack(
+                        ['address', 'bytes32', 'address', 'uint256', 'uint256'],
+                        [did, delegate.delegateType, delegate.delegate, delegate.validity, nonce]
                     )
-            })
-
-            describe("Correct Signature", async() => {
-                it("delegate added successfully", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/addDelegate", 
-                        {
-                            identity: identity,
-                            delegateType: delegateType,
-                            delegate: delegate3,
-                            validity: validity,
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    assert.ok(response && response.data, 'Have a response')
-        
-                    // console.log("Response", response)
-        
-                    assert.equal(response.data.success, true, 'Have a success response')
-                })
-
-                it("validDelegate should be true", async () => {
-                    await sleep(1000)
-                    await checkValidDelegatePOST(
-                        identity,
-                        delegateType,
-                        delegate3,
-                        true
-                        )
-                })
-            })
-
-            describe("Bad Signature", async() => {
-                it("should fail", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/addDelegate", 
-                        {
-                            identity: identity,
-                            delegateType: delegateType,
-                            delegate: delegate3,
-                            validity: validity,
-                            signature: badSignature 
-                        },
-                        auth_header)
-                    assert.ok(response && response.data, 'Have a response')
-        
-                    // console.log("Response", response)
-        
-                    assert.equal(response.data.success, false, 'Failed to add delegate')
-                })
-            })
-        })
-
-        describe("revokeDelegate()", async() => {
-            it("validDelegate should be true", async () => {
-                await sleep(1000)
-                await checkValidDelegatePOST(
-                    identity,
-                    delegateType,
-                    delegate3,
-                    true
-                    )
-            })
-
-            describe("Correct Signature", async() => {
-
-                it("delegate revoke successfully", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/revokeDelegate", 
-                        {
-                            identity: identity,
-                            delegateType: delegateType,
-                            delegate: delegate3,
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    assert.ok(response && response.data, 'Have a response')
-        
-                    // console.log("RevokeDelegate Response", response)
-        
-                    assert.equal(response.data.success, true, 'Have a success response')
-                })
-
+                    return getVeridaSign(rawMsg, key)
+                }
                 it("validDelegate should be false", async () => {
                     await sleep(1000)
                     await checkValidDelegatePOST(
-                        identity,
-                        delegateType,
-                        delegate3,
+                        did,
+                        delegate.delegateType,
+                        delegate.delegate,
                         false
                         )
                 })
+    
+                describe("Correct Signature", async() => {
+                    it("delegate added successfully", async() => {
+                        await checkOwnerPOST(did, did)
+                        const signature = await getDelegateSignature(privateKey!)
+                        const response: any = await server.post(
+                            SERVER_URL + "/addDelegate", 
+                            {
+                                identity: did,
+                                delegateType: delegate.delegateType,
+                                delegate: delegate.delegate,
+                                validity: delegate.validity,
+                                signature
+                            },
+                            auth_header)
+                        assert.ok(response && response.data, 'Have a response')
+                        assert.equal(response.data.success, true, 'Have a success response')
+                    })
+    
+                    it("validDelegate should be true", async () => {
+                        await sleep(1000)
+                        await checkValidDelegatePOST(
+                            did,
+                            delegate.delegateType,
+                            delegate.delegate,
+                            true
+                            )
+                    })
+                })
+    
+                describe("Bad Signature", async() => {
+                    it("should fail", async() => {
+                        const signature = await getDelegateSignature(badSigner.privateKey)
+                        const response: any = await server.post(
+                            SERVER_URL + "/addDelegate", 
+                            {
+                                identity: did,
+                                delegateType: delegate.delegateType,
+                                delegate: delegate.delegate,
+                                validity: delegate.validity,
+                                signature
+                            },
+                            auth_header)
+                        assert.ok(response && response.data, 'Have a response')
+                        assert.equal(response.data.success, false, 'Failed to add delegate')
+                    })
+                })
             })
+    
+            describe("revokeDelegate()", async() => {
+                const getDelegateSignature = async (key: string) => {
+                    const nonce = await getNonce(did)
+    
+                    const rawMsg = ethers.utils.solidityPack(
+                        ['address', 'bytes32', 'address', 'uint256'],
+                        [did, delegate.delegateType, delegate.delegate, nonce]
+                    )
+                    return getVeridaSign(rawMsg, key)
+                }
+                it("validDelegate should be true", async () => {
+                    await sleep(1000)
+                    await checkValidDelegatePOST(
+                        did,
+                        delegate.delegateType,
+                        delegate.delegate,
+                        true
+                        )
+                })
 
-            describe("Bad Signature", async() => {
-                it("should fail", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/revokeDelegate", 
-                        {
-                            identity: identity,
-                            delegateType: delegateType,
-                            delegate: delegate3,
-                            signature: badSignature 
-                        },
-                        auth_header)
-                    assert.ok(response && response.data, 'Have a response')
-        
-                    // console.log("Response", response)
-        
-                    assert.equal(response.data.success, false, 'Failed to add delegate')
+                describe("Bad Signature", async() => {
+                    it("should fail", async() => {
+                        const signature = await getDelegateSignature(badSigner.privateKey)
+                        const response: any = await server.post(
+                            SERVER_URL + "/revokeDelegate", 
+                            {
+                                identity: did,
+                                delegateType: delegate.delegateType,
+                                delegate: delegate.delegate,
+                                signature 
+                            },
+                            auth_header)
+                        assert.ok(response && response.data, 'Have a response')
+                        assert.equal(response.data.success, false, 'Failed to add delegate')
+                    })
+                })
+    
+                describe("Correct Signature", async() => {
+                    it("delegate revoke successfully", async() => {
+                        const signature = await getDelegateSignature(privateKey!)
+                        const response: any = await server.post(
+                            SERVER_URL + "/revokeDelegate", 
+                            {
+                                identity: did,
+                                delegateType: delegate.delegateType,
+                                delegate: delegate.delegate,
+                                signature 
+                            },
+                            auth_header)
+                        assert.ok(response && response.data, 'Have a response')
+                        assert.equal(response.data.success, true, 'Have a success response')
+                    })
+    
+                    it("validDelegate should be false", async () => {
+                        await sleep(1000)
+                        await checkValidDelegatePOST(
+                            did,
+                            delegate.delegateType,
+                            delegate.delegate,
+                            false
+                            )
+                    })
                 })
             })
         })
-        
-        describe("setAttribute()", async () => {
-            describe("Correct Signature", async() => {
 
-                it("Set attribute successfully", async() => {
-                    await sleep(1000)
-                    const response: any = await server.post(
-                        SERVER_URL + "/setAttribute", 
-                        {
-                            identity: identity,
-                            name: attributeName,
-                            value: attributeValue,
-                            validity: validity,
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, true, 'Have a success response')
-                })
-            })
+        describe('attribute test', async () => {
+            const attribute = attributes[0]
+            const attributeName = stringToBytes32(<string>attribute.name)
+            const attributeValue = attributeToHex(<string>attribute.name, attribute.value)
 
-            describe("Bad Signature", async() => {
-                it("Should fail", async() => {
-                    await sleep(1000)
-                    const response: any = await server.post(
-                        SERVER_URL + "/setAttribute", 
-                        {
-                            identity: identity,
-                            name: attributeName,
-                            value: attributeValue,
-                            validity: validity,
-                            signature: badSignature 
-                        },
-                        auth_header)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, false, 'Failed to set attribute')
-                })
-            })
-        })
-
-        describe("revokeAttribute()", async () => {
-            describe("Bad Signature", async() => {
-                it("Should fail", async() => {
-                    await sleep(1000)
-                    const response: any = await server.post(
-                        SERVER_URL + "/revokeAttribute", 
-                        {
-                            identity: identity,
-                            name: attributeName,
-                            value: attributeValue,
-                            signature: badSignature 
-                        },
-                        auth_header)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, false, 'Failed to revoke attribute')
-                })
-            })
-
-            describe("Correct Signature", async() => {
-
-                it("Revoke attribute successfully", async() => {
-                    await sleep(1000)
-                    const response: any = await server.post(
-                        SERVER_URL + "/revokeAttribute", 
-                        {
-                            identity: identity,
-                            name: attributeName,
-                            value: attributeValue,
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, true, 'Have a success response')
-                })
-            })
-        })
-
-        describe("bulkAdd()",async () => {
-            it("validity of delegates should be false",async () => {
-                await checkValidDelegatePOST(
-                    identity,
-                    formatBytes32String("bulktest-1"),
-                    delegate3,
-                    false                
-                )
-
-                await checkValidDelegatePOST(
-                    identity,
-                    formatBytes32String("bulktest-2"),
-                    delegate2,
-                    false                
-                )
-            })
+            const publicKey = pubKeyList[0]
+            const providerAddress = ethers.utils.computeAddress(publicKey)
             
-            describe("Correct signature",async () => {
-                it ("Failed because of inavlid arguments", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/bulkAdd", 
-                        {
-                            identity: identity,
-                            delegateParams: "InvalidArgs",
-                            attributeParams: "InvalidArgs",
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    // console.log("bulkAdd Response:", response)
-                    // assert.ok(response && response.data, 'Have a response')
-                    // assert.equal(response.data.success, false, 'Failed by invalid arguments')
+            const rawProof = ethers.utils.solidityPack(
+                ['address', 'address'],
+                [did, providerAddress]
+            )
+            const proofSignature = getVeridaSign(rawProof, privateKey!)
+
+            const getAttributeSignature = async (rawMsg: string, key:string) => {
+                const nonce = await getNonce(did)
+                return getVeridaSignWithNonce(rawMsg, key, nonce)
+            }
+
+            describe("setAttribute()", async () => {
+                const rawMsg = ethers.utils.solidityPack(
+                    ['address', 'bytes32', 'bytes', 'uint', 'bytes'],
+                    [did, attributeName, attributeValue, attribute.validity, proofSignature]
+                )
+
+                describe("Bad Signature", async() => {
+                    it("Should fail", async() => {
+                        await sleep(1000)
+                        const signature = await getAttributeSignature(rawMsg, badSigner.privateKey!)
+                        const response: any = await server.post(
+                            SERVER_URL + "/setAttribute", 
+                            {
+                                identity: did,
+                                name: attribute.name,
+                                value: attribute.value,
+                                validity: attribute.validity,
+                                proof: proofSignature,
+                                signature
+                            },
+                            auth_header)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, false, 'Failed to set attribute')
+                    })
                 })
 
-                it("bulkAdd success for empty values", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/bulkAdd", 
-                        {
-                            identity: identity,
-                            delegateParams: [],
-                            attributeParams: [],
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    // console.log("bulkAdd Response:", response)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, true, 'Have a success response')
+                describe("Correct Signature", async() => {
+                    it("Set attribute successfully", async() => {
+                        await sleep(1000)
+                        const signature = await getAttributeSignature(rawMsg, privateKey!)
+                        const response: any = await server.post(
+                            SERVER_URL + "/setAttribute", 
+                            {
+                                identity: did,
+                                name: attributeName,
+                                value: attributeValue,
+                                validity: attribute.validity,
+                                proof: proofSignature,
+                                signature
+                            },
+                            auth_header)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, true, 'Have a success response')
+                    })
+                })
+            })
+
+            describe("revokeAttribute()", async () => {
+                const rawMsg = ethers.utils.solidityPack(
+                    ['address', 'bytes32', 'bytes'],
+                    [did, attributeName, attributeValue]
+                )
+                describe("Bad Signature", async() => {
+                    it("Should fail", async() => {
+                        await sleep(1000)
+                        const signature = await getAttributeSignature(rawMsg, badSigner.privateKey)
+                        const response: any = await server.post(
+                            SERVER_URL + "/revokeAttribute", 
+                            {
+                                identity: did,
+                                name: attributeName,
+                                value: attributeValue,
+                                signature
+                            },
+                            auth_header)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, false, 'Failed to revoke attribute')
+                    })
+                })
+    
+                describe("Correct Signature", async() => {
+    
+                    it("Revoke attribute successfully", async() => {
+                        await sleep(1000)
+                        const signature = await getAttributeSignature(rawMsg, privateKey!)
+                        const response: any = await server.post(
+                            SERVER_URL + "/revokeAttribute", 
+                            {
+                                identity: did,
+                                name: attributeName,
+                                value: attributeValue,
+                                signature
+                            },
+                            auth_header)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, true, 'Have a success response')
+                    })
+                })
+            })
+        })
+
+        describe("bulk test", async () => {
+
+            const publicKey = pubKeyList[0]
+            const providerAddress = ethers.utils.computeAddress(publicKey)
+
+            const rawProof = ethers.utils.solidityPack(
+                ['address', 'address'],
+                [did, providerAddress]
+            )
+            const proofSignature = getVeridaSign(rawProof, privateKey!)
+
+            const delegateParams : DelegateType[] = []
+            
+            const attributeParams : AttributeType[] = []
+            
+            const revokeDelegateParams : DelegateType[] = []
+            
+            const revokeAttributeParams : AttributeType[] = []
+
+            const getBulkRawMsg = (delegateParams: DelegateType[], attrParams: AttributeType[]) => {
+                let rawMsg = ethers.utils.solidityPack(['address'], [did])
+                delegateParams.forEach(item => {
+                    if (item.validity === undefined) {
+                        rawMsg = ethers.utils.solidityPack(
+                            ['bytes','bytes32','address'],
+                            [rawMsg, item.delegateType, item.delegate]
+                          )
+                    } else {
+                        rawMsg = ethers.utils.solidityPack(
+                            ['bytes','bytes32','address','uint'],
+                            [rawMsg, item.delegateType, item.delegate, item.validity]
+                          )
+                    }
+                })
+                attrParams.forEach(item => {
+                    if (item.validity === undefined) {
+                        rawMsg = ethers.utils.solidityPack(
+                            ['bytes','bytes32','bytes'],
+                            [rawMsg, item.name, item.value]
+                          )
+                    } else {
+                        rawMsg = ethers.utils.solidityPack(
+                            ['bytes','bytes32','bytes','uint','bytes'],
+                            [rawMsg, item.name, item.value, item.validity, proofSignature]
+                          )
+                    }
+                })
+                return rawMsg
+            }
+
+            before(async () => {
+                for (let i = 0; i < 2; i++) {
+                    delegateParams.push(delegates[i])
+                    revokeDelegateParams.push({
+                        delegateType: delegates[i].delegateType,
+                        delegate: delegates[i].delegate
+                    })
+                }
+
+                const attributeName = stringToBytes32(<string>attributes[0].name)
+                const attributeValue = attributeToHex(<string>attributes[0].name, <string>attributes[0].value)
+
+                attributeParams.push({
+                    name: attributeName,
+                    value: attributeValue,
+                    validity: attributes[0].validity!,
+                    proof: proofSignature
                 })
 
-                it("bulkAdd success", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/bulkAdd", 
-                        {
-                            identity: identity,
-                            delegateParams: delegateParams,
-                            attributeParams: attributeParams,
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    // console.log("bulkAdd Response:", response)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, true, 'Have a success response')
+                revokeAttributeParams.push({
+                    name: attributeName,
+                    value: attributeValue,
                 })
+            })
 
+            describe("bulkAdd()",async () => {
+                it("validity of delegates should be false", async () => {
+                    for (let i = 0; i < delegateParams.length; i++) {
+                        await checkValidDelegatePOST(
+                            did,
+                            <string>delegateParams[i].delegateType,
+                            <string>delegateParams[i].delegate,
+                            false
+                        )
+                    }
+                })
+                
+                describe("Correct signature",async () => {
+                    it ("Failed because of inavlid arguments", async() => {
+                        const response: any = await server.post(
+                            SERVER_URL + "/bulkAdd", 
+                            {
+                                identity: did,
+                                delegateParams: "InvalidArgs",
+                                attributeParams: "InvalidArgs",
+                                signature: "" 
+                            },
+                            auth_header)
+                        // console.log("bulkAdd Response:", response)
+                        assert.ok(response && response.data, 'Have a response')
+                        assert.equal(response.data.success, false, 'Failed by invalid arguments')
+                    })
+    
+                    it("bulkAdd success for empty values", async() => {
+                        const rawMsg = getBulkRawMsg([], [])
+                        const signature = getVeridaSignWithNonce(rawMsg, privateKey!, await getNonce(did))
+                        const response: any = await server.post(
+                            SERVER_URL + "/bulkAdd", 
+                            {
+                                identity: did,
+                                delegateParams: [],
+                                attributeParams: [],
+                                signature
+                            },
+                            auth_header)
+                        // console.log("bulkAdd Response:", response)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, true, 'Have a success response')
+                    })
+    
+                    it("bulkAdd success", async() => {
+                        const rawMsg = getBulkRawMsg(delegateParams, attributeParams);
+                        const signature = getVeridaSignWithNonce(rawMsg, privateKey!, await getNonce(did))
+                        const response: any = await server.post(
+                            SERVER_URL + "/bulkAdd", 
+                            {
+                                identity: did,
+                                delegateParams: delegateParams,
+                                attributeParams: attributeParams,
+                                signature 
+                            },
+                            auth_header)
+                        // console.log("bulkAdd Response:", response)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, true, 'Have a success response')
+                    })
+    
+                    it("validity of delegates should be true",async () => {
+                        // await sleep(2000)
+                        for (let i = 0; i < delegateParams.length; i++) {
+                            await checkValidDelegatePOST(
+                                did,
+                                <string>delegateParams[i].delegateType,
+                                <string>delegateParams[i].delegate,
+                                true
+                            )
+                        }
+                    })
+                })
+    
+                describe("Bad signature", async() => {
+                    const rawMsg = getBulkRawMsg(delegateParams, attributeParams);
+                    const signature = getVeridaSignWithNonce(rawMsg, badSigner.privateKey, await getNonce(did))
+                    it("should fail", async() => {
+                        const response: any = await server.post(
+                            SERVER_URL + "/bulkAdd", 
+                            {
+                                identity: did,
+                                delegateParams: delegateParams,
+                                attributeParams: attributeParams,
+                                signature
+                            },
+                            auth_header)
+                        // console.log("bulkAdd Response:", response)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, false, 'Have a success response')
+                    })
+                })
+            })
+
+            describe("bulkRevoke()",async () => {
                 it("validity of delegates should be true",async () => {
-                    // await sleep(2000)
-                    await checkValidDelegatePOST(
-                        identity,
-                        formatBytes32String("bulktest-1"),
-                        delegate3,
-                        true
-                    )
-        
-                    await checkValidDelegatePOST(
-                        identity,
-                        formatBytes32String("bulktest-2"),
-                        delegate2,
-                        true
-                    )
+                    for (let i = 0; i < delegateParams.length; i++) {
+                        await checkValidDelegatePOST(
+                            did,
+                            <string>delegateParams[i].delegateType,
+                            <string>delegateParams[i].delegate,
+                            true
+                        )
+                    }
                 })
+    
+                describe("Bad signature", async() => {
+                    it("should fail", async() => {
+                        const rawMsg = getBulkRawMsg(revokeDelegateParams, revokeAttributeParams);
+                        const signature = getVeridaSignWithNonce(rawMsg, badSigner.privateKey, await getNonce(did))
+                        const response: any = await server.post(
+                            SERVER_URL + "/bulkRevoke", 
+                            {
+                                identity: did,
+                                delegateParams: revokeDelegateParams,
+                                attributeParams: revokeAttributeParams,
+                                signature
+                            },
+                            auth_header)
+                        // console.log("bulkAdd Response:", response)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, false, 'Failed by bad signature')
+                    })
+                })
+    
+                describe("Correct signature",async () => {
+                    it ("Failed because of inavlid arguments", async() => {
+                        const response: any = await server.post(
+                            SERVER_URL + "/bulkRevoke", 
+                            {
+                                identity: did,
+                                delegateParams: "InvalidArgs",
+                                attributeParams: "InvalidArgs",
+                                signature: "" 
+                            },
+                            auth_header)
+                        // console.log("bulkAdd Response:", response)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, false, 'Failed by invalid arguments')
+                    })
+    
+                    it("bulkRevoke success for empty values", async() => {
+                        const rawMsg = getBulkRawMsg([], [])
+                        const signature = getVeridaSignWithNonce(rawMsg, privateKey!, await getNonce(did))
+                        const response: any = await server.post(
+                            SERVER_URL + "/bulkRevoke", 
+                            {
+                                identity: did,
+                                delegateParams: [],
+                                attributeParams: [],
+                                signature
+                            },
+                            auth_header)
+                        // console.log("bulkAdd Response:", response)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, true, 'Have a success response')
+                    })
+    
+                    it("bulkRevoke success", async() => {
+                        await sleep(1000)
+                        const rawMsg = getBulkRawMsg(revokeDelegateParams, revokeAttributeParams);
+                        const signature = getVeridaSignWithNonce(rawMsg, privateKey!, await getNonce(did))
+                        const response: any = await server.post(
+                            SERVER_URL + "/bulkRevoke", 
+                            {
+                                identity: did,
+                                delegateParams: revokeDelegateParams,
+                                attributeParams: revokeAttributeParams,
+                                signature
+                            },
+                            auth_header)
+                        // console.log("bulkAdd Response:", response)
+                        assert.ok(response && response.data, 'Have a response')    
+                        assert.equal(response.data.success, true, 'Have a success response')
+                    })
+    
+                    it("validity of delegates should be false",async () => {
+                        await sleep(1000)
+                        for (let i = 0; i < delegateParams.length; i++) {
+                            await checkValidDelegatePOST(
+                                did,
+                                <string>delegateParams[i].delegateType,
+                                <string>delegateParams[i].delegate,
+                                false
+                            )
+                        }
+                    })
+                })     
             })
-
-            describe("Bad signature", async() => {
-                it("should fail", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/bulkAdd", 
-                        {
-                            identity: identity,
-                            delegateParams: delegateParams,
-                            attributeParams: attributeParams,
-                            signature: badSignature 
-                        },
-                        auth_header)
-                    // console.log("bulkAdd Response:", response)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, false, 'Have a success response')
-                })
-            })
-        })
-
-        describe("bulkRevoke()",async () => {
-            it("validity of delegates should be true",async () => {
-                await checkValidDelegatePOST(
-                    identity,
-                    formatBytes32String("bulktest-1"),
-                    delegate3,
-                    true
-                )
-
-                await checkValidDelegatePOST(
-                    identity,
-                    formatBytes32String("bulktest-2"),
-                    delegate2,
-                    true
-                )
-            })
-
-            describe("Bad signature", async() => {
-                it("should fail", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/bulkRevoke", 
-                        {
-                            identity: identity,
-                            delegateParams: revokeDelegateParams,
-                            attributeParams: revokeAttributeParams,
-                            signature: badSignature 
-                        },
-                        auth_header)
-                    // console.log("bulkAdd Response:", response)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, false, 'Failed by bad signature')
-                })
-            })
-
-            describe("Correct signature",async () => {
-                it ("Failed because of inavlid arguments", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/bulkRevoke", 
-                        {
-                            identity: identity,
-                            delegateParams: "InvalidArgs",
-                            attributeParams: "InvalidArgs",
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    // console.log("bulkAdd Response:", response)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, false, 'Failed by invalid arguments')
-                })
-
-                it("bulkRevoke success for empty values", async() => {
-                    const response: any = await server.post(
-                        SERVER_URL + "/bulkRevoke", 
-                        {
-                            identity: identity,
-                            delegateParams: [],
-                            attributeParams: [],
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    // console.log("bulkAdd Response:", response)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, true, 'Have a success response')
-                })
-
-                it("bulkRevoke success", async() => {
-                    await sleep(1000)
-                    const response: any = await server.post(
-                        SERVER_URL + "/bulkRevoke", 
-                        {
-                            identity: identity,
-                            delegateParams: revokeDelegateParams,
-                            attributeParams: revokeAttributeParams,
-                            signature: testSignature 
-                        },
-                        auth_header)
-                    // console.log("bulkAdd Response:", response)
-                    assert.ok(response && response.data, 'Have a response')    
-                    assert.equal(response.data.success, true, 'Have a success response')
-                })
-
-                it("validity of delegates should be false",async () => {
-                    await sleep(1000)
-                    await checkValidDelegatePOST(
-                        identity,
-                        formatBytes32String("bulktest-1"),
-                        delegate3,
-                        false
-                    )
-        
-                    await checkValidDelegatePOST(
-                        identity,
-                        formatBytes32String("bulktest-2"),
-                        delegate2,
-                        false
-                    )
-                })
-            })     
-        })
+        })       
     })
 });
