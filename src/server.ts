@@ -4,7 +4,6 @@ const cors = require('cors')
 import bodyParser from 'body-parser'
 import router from './routes'
 const basicAuth = require('express-basic-auth')
-import RequestValidator from './request-validator'
 
 //import DbManager from './dbManager'
 
