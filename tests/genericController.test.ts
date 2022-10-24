@@ -53,8 +53,12 @@ const getAxios = async () => {
 }
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-const SERVER_URL_HOME = `http://localhost:${PORT}`
+// const SERVER_URL_HOME = `http://localhost:${PORT}`
 const SERVER_URL = `http://localhost:${PORT}/VeridaDIDRegistry`
+// const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/VeridaDIDRegistry`
+
+
+
 
 
 let server
@@ -117,6 +121,7 @@ const getNonce = async (did: string) => {
         }, 
         auth_header                        
     )
+    // console.log("GetNonce Result : ", response.data)
     if (!response.data.success)
         return ''
     return response.data.data
@@ -716,6 +721,6 @@ describe("Generic Server Tests", function() {
                     })
                 })     
             })
-        })       
+        })
     })
 });
