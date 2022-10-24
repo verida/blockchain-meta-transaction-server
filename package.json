@@ -23,8 +23,6 @@
   "homepage": "https://github.com/verida/blockchain-meta-transaction-server#readme",
   "dependencies": {
     "@barchart/log4js-node-appenders": "^1.1.5",
-    "@verida/account-node": "^1.1.8",
-    "@verida/client-ts": "^1.1.15",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
