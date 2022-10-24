@@ -20,6 +20,11 @@
     call-me-maybe "^1.0.1"
     js-yaml "^4.1.0"
 
+"@barchart/log4js-node-appenders@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@barchart/log4js-node-appenders/-/log4js-node-appenders-1.1.5.tgz#baa80e4b45bf04e163ea3194086377027b72762b"
+  integrity sha512-cUM2FQdivFJxk0xoL9//dOXMpKOfFN2fm6/uRIzUrljwikD1e+G1wcaItzfq7j9wGpY9VoVmIaegr/JLkR3RtA==
+
 "@ethereumjs/common@^2.5.0", "@ethereumjs/common@^2.6.4":
   version "2.6.5"
   resolved "https://registry.yarnpkg.com/@ethereumjs/common/-/common-2.6.5.tgz#0a75a22a046272579d91919cb12d84f2756e8d30"
