@@ -100,7 +100,7 @@ export default class GenericController {
                 // Make transaction
                 const transaction = await contract.functions[abiMethod.name](...finalParams)
                 
-                ret = await transaction.wait()
+                ret = await transaction.wait(1)
                 // console.log(transaction) // - transaction
                 // console.log(ret) // - transactionReceipt
             }
