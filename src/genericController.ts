@@ -218,7 +218,7 @@ export default class GenericController {
         try {
             ret = await GenericController.callContractFunction(contractJson, address, abiMethod, finalParams)
         } catch(e) {
-            logger.error(`Failed transaction: ${e.getMessage()}`)
+            // logger.error(`Failed transaction: ${e.getMessage()}`)
 
             return res.status(200).send({
                 success: false,
