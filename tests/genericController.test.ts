@@ -53,12 +53,8 @@ const getAxios = async () => {
 }
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-// const SERVER_URL_HOME = `http://localhost:${PORT}`
 const SERVER_URL = `http://localhost:${PORT}/VeridaDIDRegistry`
-// const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/VeridaDIDRegistry`
-
-
-
+//const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/VeridaDIDRegistry`
 
 
 let server
@@ -121,9 +117,10 @@ const getNonce = async (did: string) => {
         }, 
         auth_header                        
     )
-    // console.log("GetNonce Result : ", response.data)
-    if (!response.data.success)
+
+    if (!response.data.success) {
         return ''
+    }
     return response.data.data
 }
 
@@ -143,7 +140,9 @@ describe("Generic Server Tests", function() {
                     },
                     auth_header
                 )
-                // console.log("Changed = ", response.data)
+
+                assert.equal(response.data.success, true, 'Success response received')
+                //console.log("Changed = ", response.data)
             }) 
         })
         
@@ -152,7 +151,7 @@ describe("Generic Server Tests", function() {
             const identity2 = Wallet.createRandom();
             const identity3 = Wallet.createRandom();
 
-            const did = identity1.address
+            const did = identity1.address.toLowerCase()
             
             describe("Correct Signature", async () => {
                 it("Change Success", async () => {
@@ -160,6 +159,7 @@ describe("Generic Server Tests", function() {
                         ['address', 'address'],
                         [did, identity2.address]
                     )
+
                     const signature = getVeridaSignWithNonce(rawMsg, identity1.privateKey, await getNonce(did))
                     const response: any = await server.post(
                         SERVER_URL + "/changeOwner", 
@@ -170,6 +170,7 @@ describe("Generic Server Tests", function() {
                         }, 
                         auth_header                        
                     )
+
                     assert.ok(response && response.data, 'Have a response')
         
                     // console.log("Response", response)
@@ -178,7 +179,7 @@ describe("Generic Server Tests", function() {
                 })
 
                 it("Identity Changed correctly", async () => {
-                    await sleep(1000)
+                    await sleep(5*1000)
                     await checkOwnerPOST(did, identity2.address)
                 })
             });
