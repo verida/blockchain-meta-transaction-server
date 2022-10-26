@@ -9,32 +9,6 @@ import { BigNumber } from 'ethers';
 
 require('dotenv').config()
 
-/**
- * Configure logging
- */
-const appenders = require('@barchart/log4js-node-appenders');
-const log4js = require("log4js")
-
-if (process.env.LOG_LAMBDA) {
-    log4js.configure({
-        categories: {
-            default: { appenders: [ 'lambda' ], level: 'trace' }
-        },
-        appenders: {
-            lambda: {
-                type: appenders.lambda,
-                layout: {
-                    type: 'pattern',
-                    pattern: '%c - %m%'
-                }
-            }
-        }
-    });
-}
-
-const logger = log4js.getLogger()
-logger.level = process.env.LOG_LEVEL;
-
 /** Verida company wallet accoutn that pays for gass fees */
 const privateKey = process.env.PRIVATE_KEY;
 
@@ -92,7 +66,7 @@ export default class GenericController {
                 finalParams.push(paramData)
             })
         } catch(e: any) {
-            logger.error(e.getMessage())
+            console.error(e)
             throw e
         }
         return finalParams
@@ -107,7 +81,7 @@ export default class GenericController {
      * @returns - Transaction response that contains transaction hash
      */
     private static async callContractFunction(abi: any, address: string, abiMethod: any, finalParams: any) {
-        logger.trace(`callContractFunction(${abiMethod})`)
+        console.info(`callContractFunction(${abiMethod})`)
 
         const contract = ContractFactory.fromSolidity(abi)
             .attach(address)
@@ -125,11 +99,14 @@ export default class GenericController {
                 const transaction = await contract.functions[abiMethod.name](...finalParams)
                 
                 ret = await transaction.wait(1)
-                logger.debug(`Transaction`, transaction)
-                logger.debug(`Receipt`, ret)
+                console.log(`Transaction`, transaction)
+                console.log(`Receipt`, ret)
             }
         } catch(e: any) {
-            logger.error(e.getMessage())
+            console.error(e)
+            console.error('Contract Error! Here is the method and params:')
+            console.error(abiMethod)
+            console.error(finalParams)
             throw e
         }
 
@@ -156,7 +133,8 @@ export default class GenericController {
             config = (await import(`./contracts/${contract}/config`)).default
             // console.log("GenericController config = ", config)
         } catch (e) {
-            logger.error('contract()', e.getMessage())
+            console.error('contract() error:')
+            console.error(e)
 
             return res.status(400).send({
                 success: false,
@@ -218,7 +196,8 @@ export default class GenericController {
         try {
             ret = await GenericController.callContractFunction(contractJson, address, abiMethod, finalParams)
         } catch(e) {
-            // logger.error(`Failed transaction: ${e.getMessage()}`)
+            console.error('Failed transaction')
+            console.error(e)
 
             return res.status(200).send({
                 success: false,

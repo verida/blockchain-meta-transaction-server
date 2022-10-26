@@ -3,17 +3,14 @@ import serverless from 'serverless-http'
 const cors = require('cors')
 import bodyParser from 'body-parser'
 import router from './routes'
-const basicAuth = require('express-basic-auth')
 
 //import DbManager from './dbManager'
 
 import dotenv from 'dotenv'
-import { BigNumberish, BytesLike } from 'ethers'
 dotenv.config();
 
 // Set up the express app
 const app = express();
-// const validator = new RequestValidator()
 
 const corsConfig = {}
 
@@ -21,12 +18,6 @@ const corsConfig = {}
 app.use(cors(corsConfig))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-// Commenting out authorization for now
-/*app.use(basicAuth({
-  authorizer: validator.authorize,
-  authorizeAsync: true,
-  unauthorizedResponse: validator.getUnauthorizedResponse
-}))*/
 app.use(router)
 
 //DbManager.ensureDb(process.env.DB_DOC_NAME)
@@ -34,6 +25,8 @@ app.use(router)
 /**
  * EndPoints for APIs
  */
-app.get('/', (req, res) => res.send('Welcome to Verida-DID-Registry API!'))
+app.get('/', (req, res) => {
+  res.send('Welcome to Verida-DID-Registry API!')
+})
 
 export const handler = serverless(app)
