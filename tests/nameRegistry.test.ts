@@ -44,7 +44,8 @@ const getAxios = async () => {
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
 const SERVER_URL_HOME = `http://localhost:${PORT}`
-const SERVER_URL = `http://localhost:${PORT}/NameRegistry`
+// const SERVER_URL = `http://localhost:${PORT}/NameRegistry`
+const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/NameRegistry`
 
 let server
 
