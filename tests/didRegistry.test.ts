@@ -242,7 +242,7 @@ describe("DIDRegistry Test", function() {
                 assert.equal(response.data.success, isSuccessful, 'Have a success response')
 
                 if (isSuccessful) {
-                    assert.deepEqual(response.data.data, result, 'Get same endpoints registered')
+                    assert.deepEqual(response.data.data[1], result, 'Get same endpoints registered')
                 }
             }
 
