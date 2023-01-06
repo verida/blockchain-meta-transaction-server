@@ -9,7 +9,7 @@
     "start": "sls offline start --stage offline",
     "tests": "ts-mocha './tests/**/*.ts'",
     "test": "ts-mocha --timeout 100000",
-    "deploy": "sls deploy --stage testnet"
+    "deploy": "yarn build && sls deploy --stage testnet"
   },
   "repository": {
     "type": "git",
