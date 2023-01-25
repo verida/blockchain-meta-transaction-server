@@ -76,18 +76,4 @@ export default class Config {
 
         return true
     }
-
-    /**
-     * Get VeridaDIDRegistry contract deployed on targeting blockchain
-     * @returns {string} Address of VeridaDIDRegistry contract deployed.
-     */
-    public static getContractAddress() {
-        const netName = getCurrentNet();
-        const address = process.env[`CONTRACT_ADDRESS_${netName}_DidRegistry`];
-        if (address == undefined) {
-            throw new Error("No contract address in .env file.")
-        }
-        return address;
-    }
-
 }
