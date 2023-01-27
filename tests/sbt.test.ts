@@ -228,7 +228,7 @@ describe("SBT Tests", () => {
     })
 
     describe("Get tokenInfo from claimed token Id", () => {
-        it.only("Should return SBT type & uniqueId for claimed tokenIDs",async () => {
+        it("Should return SBT type & uniqueId for claimed tokenIDs",async () => {
             const requestedTokenInfo = [
                 [ 'twitter', '-testId' ],
                 [ 'twitter', '-diffId' ]

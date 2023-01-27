@@ -132,6 +132,10 @@ export interface SignInfo {
     userProof?:  string
 }
 
+////// mansion blush garden proof must flame person divert echo shield push giggle 
+////// oil coach rival box erode mesh box found concert margin express breeze
+// claw soccer owner drift current hawk mass journey funny exchange destroy vibrant
+
 export async function generateProof() : Promise<SignInfo> {
     // const signWallet = Wallet.createRandom()
     const signWallet = Wallet.fromMnemonic('devote biology pass disorder fit cherry grace polar wrist trash regret frame')
@@ -143,7 +147,11 @@ export async function generateProof() : Promise<SignInfo> {
 
     // console.log("Signer: ", signWallet.address, " - ", signerDid)
 
-    const userVerida = await initVerida(Wallet.createRandom(), 'Verida: Test DID User Context')
+    // const userVerida = await initVerida(Wallet.createRandom(), 'Verida: Test DID User Context')
+    // For test purpose
+    const fixedWallet = Wallet.fromMnemonic('mansion blush garden proof must flame person divert echo shield push giggle')
+    const userVerida = await initVerida(fixedWallet, 'Verida: Test DID User Context')
+    
     const userWallet = userVerida.didwallet
     const userAccount = userVerida.account
     const userDid = await userAccount.did()
