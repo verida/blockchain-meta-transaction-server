@@ -231,8 +231,7 @@ const callUnlinkAPI = async(
 
 describe("DIDLinkage Tests", () => {
 
-    // const eip155Signer = Wallet.createRandom()
-    const eip155Signer = Wallet.fromMnemonic('oil coach rival box erode mesh box found concert margin express breeze')    
+    const eip155Signer = Wallet.createRandom()
 
     const identifiers = [
         'facebook|test01',
@@ -251,12 +250,7 @@ describe("DIDLinkage Tests", () => {
     describe("Link", () => {
 
         const getSelfSignedData = (didAddr: string, signWallet : Wallet) => {
-            // const contextSigner = Wallet.createRandom()
-            const contextSigner = {
-                address: "0x1Ac3e26e1B5241B0aA11eB2646405BAc1919c784",
-                privateKey: "0xff8ca2b935c1b9029a4f783c307e2ed543c93fa64d2c029e124d09d3409e79ec",
-                publicKey: "0x04707d7adcbfc528b5f8cb7efd1dce9f5d9b32ed56a0f663d67c036d394bc8bb27e8b8bf53276e14db6e4a4b69a9f42b9e920198fc281b2668805c6fab8ee02646",
-            }
+            const contextSigner = Wallet.createRandom()
             
             const did = `did:vda:${didAddr}`.toLowerCase()
             const identifier = `blockchain:eip155|${signWallet.address.toLowerCase()}`

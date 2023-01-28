@@ -181,7 +181,7 @@ describe("SBT Tests", () => {
 
     describe("Claim SBT", () => {
         const sbtType = sbtTypes[0];
-        const uniqueId = "-testId";
+        const uniqueId = "-testId" + Wallet.createRandom().address;
         
         before(async () => {
             signInfo = await generateProof()
@@ -208,7 +208,7 @@ describe("SBT Tests", () => {
         })
 
         it("Claimed same SBT type with different ID", async () => {
-            const diffId = "-diffId";
+            const diffId = "-diffId" + Wallet.createRandom().address;
             const msg = ethers.utils.solidityPack(
                 ['string','address'],
                 [`${sbtType}-${diffId}-`, signInfo.userAddress]

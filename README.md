@@ -77,172 +77,62 @@ PRIVATE_KEY = "35...7de"
 
 #### Select chains
 ```
-RPC_TARGET_NET = "RPC_URL_BSC_TESTNET"
+RPC_TARGET_NET = "RPC_URL_POLYGON_TESTNET"
 RPC_URL_POLYGON_MAINNET="https://polygon-rpc.com"
 RPC_URL_POLYGON_TESTNET="https://rpc-mumbai.maticvigil.com"
-RPC_URL_BSC_TESTNET="https://speedy-nodes-nyc.moralis.io/bd1c39d7c8ee1229b16b4a97/bsc/testnet"
 ```
-`RPC_TARGET_NET` is the chain that this server send transactions. The value must be one of following:
+`RPC_TARGET_NET` is the chain that this server send transactions. The value should be one of following:
 ```
 RPC_URL_POLYGON_MAINNET
 RPC_URL_POLYGON_TESTNET
-RPC_URL_BSC_TESTNET
 ```
-#### Contract addresses
-
-You can add contract addresses deployed on chains.
-We should follow this rule when creating contract variables:
-- variable name must have prefix of `CONTRACT_ADDRESS_`.
-- After prefix, specify chain name. And this chain name must be existed in the `.env` file.
-    ex: `RPC_URL_POLYGON_MAINNET`
-- Finally specify contract name.
-    ex: `DidRegistry`
-
-ex: `CONTRACT_ADDRESS_RPC_URL_BSC_TESTNET_DidRegistry = "0x2862BC860f55D389bFBd1A37477651bc1642A20B"` this variable is pointing VeridaDidRegistry contract deployed on BSC testnet.
 
 ## Lambda configuration
 
 1. Ensure timeout is set to `20` seconds for API gateway and the lambda. Otherwise you may see `Service Unavailable` or weird `Invalid signature` errors when things timeout.
 
-# VDA-DID-Registry contract
-
-All end-points for VDA-DID-Registry contracts has prefix of "/VeridaDIDRegistry" in its path: 
-```
-https://hosting-server-url/VeridaDIDRegistry/...
-```
-_Ex_: https://localhost:5021/VeridaDIDRegistry/identityOwner?identity=0x268c970A5FBFdaFfdf671Fa9d88eA86Ee33e14B1<br/><br/>
-
-There are 9 endpoints for **VDA-DID-Registry** contract:
-- identityOwner
-- validDelegate
-- changeOwner
-- addDelegate
-- revokeDelegate
-- setAttribute
-- revokeAttribute
-- bulkAdd
-- bulkRevoke
-
-## Endpoint Returns
+# Returns of Meta-transaction-Server
 
 All endpoints returns JSON object. JSON object are a bit different between success & failed.
 
-### Return of Success
+## Return of Success
 
 ```
 {success: true, data: <necessary data or transaction hash>}
 ```
 
-### Return of Fail
+## Return of Fail
 
 ```
 {success: fail, error: <error message>}
 ```
-## Endpoint Parameters
-### 1. identityOwner
-Returns owner of DID
-#### Parameters
-- identity
-### 2. validDelegate
-Check whether delegate is valid or not.
-#### Parameters
-- identity
-- delegateType
-- delegate
-### 3. changeOwner
-Change owner of DID.
-#### Parameters
-- identity
-- newOwner
-- signature
-### 4. addDelegate
-Add delegate.
-#### Parameters
-- identity
-- delegateType
-- delegate
-- validity
-- signature
-### 5. revokeDelegate
-Revoke delegate.
-#### Parameters
-- identity
-- delegateType
-- delegate
-- signature
-### 6. setAttribute
-Set attribute.
-#### Parameters
-- identity
-- name
-- value
-- validity
-- signature
-### 7. revokeAttribute
-Revoke attribute.
-#### Parameters
-- identity
-- name
-- value
-- signature
-### 8. bulkAdd
-Add multiple delegates & attributes.
-#### Parameters
-- identity
-- delegateParams
-- attributeParams
-- signature
-### 9. bulkRevoke
-Revoke multiple delegates & attributes.
-#### Parameters
-- identity
-- revokeDelegateParams
-- revokeAttributeParams
-- signature
-### Parameter Types & Usage example
-#### Parameter Types
-Here explain parameter types in above.
-- identity, delegate, newOwner : 40bytes string.<br/>
-_Ex_ : "0x1234567890123456789012345678901234567890"
-- delegateType, name : 32Bytes string.<br/>
-_Ex_ : "0x12345678901234567890123456789012"
-- value : Bytes array string<br/>
-_Ex_ : "0x1234..."
-- validity : String of UInt256<br/>
-_Ex_ : "86400"
-- delegateParams : String of following JSON object:<br/>
-{delegateType, delegate, validity}[]
-- revokeDelegateParams : String of following JSON object:<br/>
-{delegateType, delegate}[]
-- attributeParams : String of following JSON object:<br/>
-{name, value, validity}[]
-- revokeAttributeParams : String of following JSON object:<br/>
-{name, value}[]<br/>
-#### Usage Example
-- GET
-`https://server-url/vda-did-registry/identityOwner?...`
-- POST
-Here shows sample code to send POST request using Axios library
-```
-import Axios from 'axios'
-const getAxios = async () => {
-    const config: any = {
-        headers: {
-            "context-name": SENDER_CONTEXT,
-        },
-    }
-    ...
-    return Axios.create(config)
-}
-const server = await getAxios()
 
-const getIdentity = async () => {
-  const response: any = await server.post(
-    "https://localhost:5021//vda-did-registry/identityOwner,
-    {
-      identity:"0x268c970A5FBFdaFfdf671Fa9d88eA86Ee33e14B1"
-    }
-  )
-  ...
-}
+# Supporting contracts
+## DID-Registry contract
+
+All end-points for **VDA-DID-Registry** contracts has prefix of "/VeridaDIDRegistry" in its path: 
 ```
+https://hosting-server-url/VeridaDIDRegistry/...
+```
+
+## NameRegistry contract
+All end-points for **NameRegistry** contracts has prefix of "/NameRegistry" in its path: 
+```
+https://hosting-server-url/NameRegistry/...
+```
+
+## DID-Linkage contract
+All end-points for **VDA-DID-Linkage** contracts has prefix of "/VeridaDIDLinkage" in its path: 
+```
+https://hosting-server-url/VeridaDIDLinkage/...
+```
+
+## SBT contract
+All end-points for **SBT** contracts has prefix of "/VeridaDIDLinkage" in its path: 
+```
+https://hosting-server-url/SBT/...
+```
+
+### Caution
+Some functions of SBT contract can't be called via **meta-transaction-server**. <br>For example, `getClaimedSBTList()` & `burnSBT()` functions should be called by only the owner of the SBTs. If you called these functions via **meta-transaction-server**, it'd be always failed.
+
