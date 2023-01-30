@@ -163,9 +163,9 @@ const sbtTypes = [
 ]
 
 const tokenURIs = [
-    "https://Token-URI/test-1",
-    "https://Token-URI/test-2",
-    "https://Token-URI/test-3"    
+    "https://gateway.pinata.cloud/ipfs/QmVrTkbrzNHRhmsh88XnwJo5gBu8WqQMFTkVB4KoVLxSEY/1.json",
+    "https://gateway.pinata.cloud/ipfs/QmVrTkbrzNHRhmsh88XnwJo5gBu8WqQMFTkVB4KoVLxSEY/2.json",
+    "https://gateway.pinata.cloud/ipfs/QmVrTkbrzNHRhmsh88XnwJo5gBu8WqQMFTkVB4KoVLxSEY/3.json",
 ]
 
 const zeroAddress = "0x0000000000000000000000000000000000000000"
@@ -187,7 +187,7 @@ describe("SBT Tests", () => {
             signInfo = await generateProof()
             // console.log("SignInfo : ", signInfo)
         })
-        
+
         it("Claimed one SBT", async () => {
             // contract.addTrustedSigner(signInfo.signerAddress)
 
