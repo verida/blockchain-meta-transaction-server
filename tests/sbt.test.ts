@@ -156,6 +156,18 @@ const callTokenInfoAPI = async (
     }
 }
 
+const callTotalSupply = async() => {
+    const response = await server.post(
+        SERVER_URL + "/totalSupply",
+        {},
+        auth_header
+    )
+
+    assert.ok(response && response.data, 'Have a response')
+    assert.equal(response.data.success, true, 'Have a success response')
+    return response.data.data
+}
+
 const sbtTypes = [
     "twitter",
     "facebook",
@@ -174,6 +186,8 @@ const zeroAddress = "0x0000000000000000000000000000000000000000"
 const claimer = '0x8f6473D72d4b51B7b6147F6C6C0CC3F833d96B7a'
 
 describe("SBT Tests", () => {
+    const uniqueId = "-testId" + Wallet.createRandom().address;
+    const diffId = "-diffId" + Wallet.createRandom().address;
    
     before( async () => {
         server = await getAxios()
@@ -181,7 +195,7 @@ describe("SBT Tests", () => {
 
     describe("Claim SBT", () => {
         const sbtType = sbtTypes[0];
-        const uniqueId = "-testId" + Wallet.createRandom().address;
+        
         
         before(async () => {
             signInfo = await generateProof()
@@ -208,7 +222,7 @@ describe("SBT Tests", () => {
         })
 
         it("Claimed same SBT type with different ID", async () => {
-            const diffId = "-diffId" + Wallet.createRandom().address;
+            
             const msg = ethers.utils.solidityPack(
                 ['string','address'],
                 [`${sbtType}-${diffId}-`, signInfo.userAddress]
@@ -230,10 +244,12 @@ describe("SBT Tests", () => {
     describe("Get tokenInfo from claimed token Id", () => {
         it("Should return SBT type & uniqueId for claimed tokenIDs",async () => {
             const requestedTokenInfo = [
-                [ 'twitter', '-testId' ],
-                [ 'twitter', '-diffId' ]
+                [ 'twitter', uniqueId ],
+                [ 'twitter', diffId ]
             ]
-            const idList = [1,2]
+
+            const totalSupply = parseInt(await callTotalSupply())
+            const idList = [totalSupply - 1, totalSupply]
 
             for(let i = 0; i < idList.length; i++) {
                 await callTokenInfoAPI(idList[i], true, requestedTokenInfo[i])
