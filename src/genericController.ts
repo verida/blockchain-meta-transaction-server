@@ -6,6 +6,7 @@ import { ContractFactory } from '@ethersproject/contracts'
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet'
 import { BigNumber } from 'ethers';
+import { CONTRACT_ADDRESS, CONTRACT_ADDRESS_TESTNET } from './const';
 
 require('dotenv').config()
 
@@ -190,7 +191,10 @@ export default class GenericController {
         // console.log("Params: ", finalParams)
 
         // @todo: actually call the smart contract
-        const address = config.getContractAddress()
+        // const address = config.getContractAddress()
+        const address = getCurrentNet() === 'RPC_URL_POLYGON_MAINNET' ? 
+                CONTRACT_ADDRESS[contract] :
+                CONTRACT_ADDRESS_TESTNET[contract]
 
         let ret;
         try {
