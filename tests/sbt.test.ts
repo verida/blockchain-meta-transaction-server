@@ -45,8 +45,8 @@ const getAxios = async () => {
 }
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-const SERVER_URL = `http://localhost:${PORT}/SBT`
-//const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/SBT`
+const SERVER_URL = `http://localhost:${PORT}/SoulboundNFT`
+//const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/SoulboundNFT`
 
 // Authentication header for http requests
 const auth_header = {
