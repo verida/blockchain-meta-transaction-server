@@ -208,6 +208,7 @@ export default class GenericController {
 
             return res.status(200).send({
                 success: false,
+                message: e.message,
                 error: e.toString(),
                 reason
             })
