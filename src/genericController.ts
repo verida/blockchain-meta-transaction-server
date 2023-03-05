@@ -200,12 +200,17 @@ export default class GenericController {
         try {
             ret = await GenericController.callContractFunction(contractJson, address, abiMethod, finalParams)
         } catch(e) {
-            console.error('Failed transaction')
+            let reason = e.reason ? e.reason : 'Unknown'
+            reason = e.error && e.error.reason ? e.error.reason : reason
+            reason = reason.replace('execution reverted: ','')
+
+            console.error(`Failed transaction: ${e.message} (${reason})`)
             console.error(e)
 
             return res.status(200).send({
                 success: false,
-                error: e.toString()
+                error: e.toString(),
+                reason
             })
         }
 ``
