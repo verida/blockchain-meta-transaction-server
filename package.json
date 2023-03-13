@@ -47,7 +47,7 @@
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.31",
     "@verida/account-node": "^2.0.0",
-    "@verida/client-ts": "^2.0.1",
+    "@verida/client-ts": "^2.2.0",
     "@verida/did-client": "^2.0.0",
     "@verida/encryption-utils": "^2.0.0-rc1",
     "nodemon": "^2.0.14",
