@@ -50,10 +50,10 @@ const SERVER_URL = `http://localhost:${PORT}/NameRegistry`
 let server
 
 const testNames = [
-    "helloworld1.verida",
-    "hello----world--1.verida",
-    "hello_world-dave1.verida",
-    "JerrySmith1.verida",
+    "helloworld1.vda",
+    "hello----world--1.vda",
+    "hello_world-dave1.vda",
+    "JerrySmith1.vda",
 
     "JerrySmith1.test",
     "Billy1.test",
@@ -178,7 +178,7 @@ describe("NameRegistry Tests", function() {
         })
 
         it("Should fail : Invalid character specified in names", async () => {
-            const invalidnames = ["hello world.verida", "hello!world.verida"];
+            const invalidnames = ["hello world.vda", "hello!world.vda"];
             for (let i = 0; i < invalidnames.length; i++) {
                 const name = invalidnames[i];
                 const signature = await getRegisterSignature(name, dids[0]);
@@ -195,7 +195,7 @@ describe("NameRegistry Tests", function() {
         })
 
         it("Should fail : . not permitted", async () => {
-            const invalidnames = ["david.test.verida", "hello..verida"];
+            const invalidnames = ["david.test.vda", "hello..vda"];
             for (let i = 0; i < invalidnames.length; i++) {
                 const name = invalidnames[i];
                 const signature = await getRegisterSignature(name, dids[0]);

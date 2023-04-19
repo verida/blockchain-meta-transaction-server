@@ -1,5 +1,5 @@
 import { BytesLike } from 'ethers';
-import {stringToBytes32, getCurrentNet} from '../../helpers'
+import { CONTRACT_NAMES } from '@verida/vda-common';
 
 require('dotenv').config()
 
@@ -25,7 +25,7 @@ export default class Config {
      * @param paramData - parameter value in HTTP POST body
      * @returns adjusted parameter value
      */
-    public static customParams(paramName: any, paramData: any) {
+    public static customParams(contractName: CONTRACT_NAMES, paramName: any, paramData: any) {
         /*
         switch(paramName) {
             case 'delegateType':
@@ -64,7 +64,7 @@ export default class Config {
      * @param req - requested body of incoming http request.
      * @returns {boolean} validity of request
      */
-    public static async isRequestValid(req: any) {
+    public static async isRequestValid(contractName: CONTRACT_NAMES, req: any) {
         // @todo: validate the request (ie: authentication, valid user-agent etc.)
 
         // console.log("Authenticating: ", req.headers);

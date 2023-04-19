@@ -1,6 +1,7 @@
 const assert = require("assert")
 import Axios from 'axios'
-import { Network, EnvironmentType, Context } from '@verida/client-ts'
+import { Network, Context } from '@verida/client-ts'
+import { EnvironmentType } from '@verida/types'
 import { AutoAccount } from '@verida/account-node'
 
 import dotenv from 'dotenv'

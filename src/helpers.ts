@@ -11,21 +11,8 @@ require('dotenv').config()
  * @returns Blockchain name
  */
 export function getCurrentNet() {
-  const defaultNet = "RPC_URL_POLYGON_MAINNET";
+  const defaultNet = "testnet";
   return process.env.RPC_TARGET_NET != undefined ? process.env.RPC_TARGET_NET :  defaultNet;
-}
-
-/**
- * Get RPC URL of chain.
- * Read value from .env file.
- * @param net Blockchain name
- * @returns 
- */
-export function getRPCURLofNet(net : string) {
-  const defaultNetURL = "https://polygon-rpc.com";
-  let rpcURL = process.env[net];
-  rpcURL = rpcURL != undefined ? rpcURL : defaultNetURL;
-  return rpcURL;
 }
 
 /**
