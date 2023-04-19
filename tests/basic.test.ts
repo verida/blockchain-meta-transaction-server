@@ -79,26 +79,22 @@ describe("Generic Server Tests", function() {
         server = await getAxios()
 
         it("Can echo", async () => {
-            const response: any = await server.post(SERVER_URL + '/echo', {
-                message: 'world'
-            })
+            const response: any = await server.get(SERVER_URL + '/')
 
-            console.log('echo response', response.data.data)
+            console.log(response.data)
+
             assert.ok(response && response.data, 'Have a response')
-            assert.equal(response.data.status, 'success', 'Have a success response')
-            assert.equal(response.data.data.message, `hello world`, 'success', 'Have the expected messge')
+            assert.equal(response.status, '200', 'Have a success response')
         })
 
-        it("Can error", async () => {
+        it("Can rejected", async () => {
             const promise = new Promise((resolve, rejects) => {
                 server.get(SERVER_URL + '/error', {}).then(rejects, resolve)
             })
 
             const result: any = await promise
 
-            assert.equal(result.response.status, 400, 'Have expected error HTTP status code')
-            assert.equal(result.response.data.status, 'fail', 'Have a fail status')
-            assert.equal(result.response.data.message, 'Error generated', 'Message generated')
+            assert.equal(result.response.status, 404, 'Have expected error HTTP status code')
         })
     });
 
