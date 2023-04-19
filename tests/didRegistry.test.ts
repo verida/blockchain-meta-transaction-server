@@ -1,62 +1,15 @@
 const assert = require("assert")
-import Axios from 'axios'
 
-import dotenv from 'dotenv'
 import { ethers, Wallet } from 'ethers'
-dotenv.config()
-
 import {
     dids,
     getVeridaSignWithNonce, 
 } from './utils'
+import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SENDER_CONTEXT = 'Verida Test: Any sending app'
-
-const getAxios = async () => {
-    const config: any = {
-        headers: {
-            "context-name": SENDER_CONTEXT,
-        },
-    }
-
-    /*
-    context = await Network.connect({
-        context: {
-            name: SENDER_CONTEXT
-        },
-        client: {
-            environment: VERIDA_ENVIRONMENT
-        },
-        account
-    })
-    */
-
-    /*
-    SENDER_DID = (await account.did()).toLowerCase()
-    const keyring = await account.keyring(SENDER_CONTEXT)
-    SENDER_SIG = await keyring.sign(`Access the "generic" service using context: "${SENDER_CONTEXT}"?\n\n${SENDER_DID}`)
-    
-    config["auth"] = {
-        username: SENDER_DID.replace(/:/g, "_"),
-        password: SENDER_SIG,
-    }*/
-    
-    return Axios.create(config)
-}
-
-const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-const SERVER_URL = `http://localhost:${PORT}/VeridaDIDRegistry`
-//const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/VeridaDIDRegistry`
-
+const SERVER_URL = getServerURL("DidRegistry")
 
 let server
-
-// Authentication header for http requests
-const auth_header = {
-    headers: {
-        'user-agent': 'Verida-Vault'
-    }
-}
 
 const getNonce = async (did: string) => {
     const response: any = await server.post(
@@ -64,7 +17,7 @@ const getNonce = async (did: string) => {
         {
             didAddress: did,
         }, 
-        auth_header                        
+        AUTH_HEADER                        
     )
 
     if (!response.data.success) {
@@ -132,7 +85,7 @@ const callRegisterAPI = async (did: string, endpoints: string[], signKey: string
             endpoints: endpoints,
             signature
         },
-        auth_header
+        AUTH_HEADER
     );
 
     // return response;
@@ -150,7 +103,7 @@ const callRevokeAPI = async (did: string, signKey: string, isSuccessful: boolean
             didAddress: did,
             signature
         },
-        auth_header
+        AUTH_HEADER
     );
 
     // return response;
@@ -166,7 +119,7 @@ const callGetControllerAPI = async (did: string, isSuccessful: boolean, controll
         {
             didAddress: did,
         },
-        auth_header
+        AUTH_HEADER
     );
 
     // console.log("Response", response)
@@ -186,7 +139,7 @@ const callSetControllerAPI = async (did: string, controller: string, signKey: st
             controller: controller,
             signature
         },
-        auth_header
+        AUTH_HEADER
     );
 
     // console.log("Response", response)
@@ -198,7 +151,7 @@ const callSetControllerAPI = async (did: string, controller: string, signKey: st
 describe("DIDRegistry Test", function() {
     before(async () =>{
         this.timeout(100000)
-        server = await getAxios()
+        server = await getAxios("DidRegistry")
     })
 
     describe("Register", () => {
@@ -233,7 +186,7 @@ describe("DIDRegistry Test", function() {
                 {
                     didAddress: did,
                 },
-                auth_header
+                AUTH_HEADER
             );
         
             

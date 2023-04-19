@@ -1,4 +1,3 @@
-import { BytesLike } from 'ethers';
 import { CONTRACT_NAMES } from '@verida/vda-common';
 
 require('dotenv').config()
