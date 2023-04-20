@@ -1,7 +1,7 @@
 const assert = require("assert")
 import Axios from 'axios'
 import { Network, Context } from '@verida/client-ts'
-import { EnvironmentType } from '@verida/types'
+import { AccountNodeDIDClientConfig, EnvironmentType, Web3CallType } from '@verida/types'
 import { AutoAccount } from '@verida/account-node'
 
 import dotenv from 'dotenv'
@@ -11,20 +11,19 @@ const SENDER_CONTEXT = 'Verida Test: Any sending app'
 const SENDER_PRIVATE_KEY = '0x78d3b996ec98a9a536efdffbae40e5eaaf117765a587483c69195c9460165c37'
 
 const VERIDA_ENVIRONMENT = EnvironmentType.TESTNET
-const VERIDA_TESTNET_DEFAULT_SERVER = 'https://db.testnet.verida.io:5002/'
+
+const DID_CLIENT_CONFIG: AccountNodeDIDClientConfig = {
+    callType: 'web3',
+    web3Config: {
+        privateKey: '',
+        rpcUrl: 'https://rpc-mumbai.maticvigil.com/'
+    }
+},
 
 const account = new AutoAccount({
-    defaultDatabaseServer: {
-        type: 'VeridaDatabase',
-        endpointUri: VERIDA_TESTNET_DEFAULT_SERVER
-    },
-    defaultMessageServer: {
-        type: 'VeridaMessage',
-        endpointUri: VERIDA_TESTNET_DEFAULT_SERVER
-    }
-}, {
     privateKey: SENDER_PRIVATE_KEY, 
-    environment: VERIDA_ENVIRONMENT
+    environment: VERIDA_ENVIRONMENT,
+    didClientConfig: DID_CLIENT_CONFIG
 })
 
 let context: Context
