@@ -1,12 +1,15 @@
-import { DIDClient, DIDClientConfig } from "@verida/did-client"
+import { DIDClient } from "@verida/did-client"
 import { AutoAccount } from "@verida/account-node";
-import { Client, EnvironmentType } from "@verida/client-ts";
+import { Client } from "@verida/client-ts";
+import { DIDClientConfig, EnvironmentType } from "@verida/types";
 
 // import { Wallet } from '@ethersproject/wallet'
 import { Wallet } from "ethers"
 import { JsonRpcProvider } from '@ethersproject/providers'
 
 import { Keyring } from "@verida/keyring";
+import dotenv from 'dotenv'
+dotenv.config()
 
 if (process.env.PRIVATE_KEY === undefined) {
     throw new Error('PRIVATE_KEY not defined in env')
@@ -25,7 +28,7 @@ const txSigner = new Wallet(privateKey, provider)
 export async function getDIDClient(veridaAccount: Wallet) {
     
     const config: DIDClientConfig = {
-        network: 'testnet',
+        network: EnvironmentType.TESTNET,
         rpcUrl: rpcUrl
     }
 

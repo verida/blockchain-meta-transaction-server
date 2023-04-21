@@ -156,10 +156,7 @@ describe("SBT Tests", () => {
         it("Claimed one SBT", async () => {
             // contract.addTrustedSigner(signInfo.signerAddress)
 
-            const msg = ethers.utils.solidityPack(
-                ['string','address'],
-                [`${sbtType}-${uniqueId}-`, signInfo.userAddress]
-            )
+            const msg = `${sbtType}-${uniqueId}-${signInfo.userAddress.toLowerCase()}`
             const signedData = await signInfo.signKeyring.sign(msg)
             
             await callClaimSBTAPI(
@@ -174,11 +171,7 @@ describe("SBT Tests", () => {
 
         it("Claimed same SBT type with different ID", async () => {
             
-            const msg = ethers.utils.solidityPack(
-                ['string','address'],
-                [`${sbtType}-${diffId}-`, signInfo.userAddress]
-            )
-
+            const msg = `${sbtType}-${diffId}-${signInfo.userAddress.toLowerCase()}`
             const signedData = await signInfo.signKeyring.sign(msg)
 
             await callClaimSBTAPI(

@@ -51,8 +51,6 @@ export const dids = [
   }
 ]
 
-export const zeroAddress = '0x0000000000000000000000000000000000000000'
-
 export const getVeridaSign = (rawMsg : any, privateKey: string ) => {
   const privateKeyArray = new Uint8Array(Buffer.from(privateKey.slice(2), 'hex'))
   return EncryptionUtils.signData(rawMsg, privateKeyArray)
