@@ -127,19 +127,23 @@ export default class GenericController {
      * @param {*} res - http response object
      */
     public static async contract(req: Request, res: Response) {
-        const { contract, method } = req.params
+        let { contract, method } = req.params
         let contractJson: any
 
         // @todo: try / catch to check if invalid contract specified
         try {
             contractJson = CONTRACT_ABI[contract as CONTRACT_NAMES];
+
+            if (!contractJson) {
+                throw new Error(`Unable to locate contract ABI (${contract})`)
+            }
         } catch (e) {
             console.error('contract() error:')
             console.error(e)
 
             return res.status(400).send({
                 success: false,
-                error: 'Invalid contract'
+                error: `Invalid contract (${contract})`
             })
         }
 
