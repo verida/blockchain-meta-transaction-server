@@ -5,7 +5,7 @@ import { generateProof, SignInfo } from './utils-keyring'
 import EncryptionUtils from "@verida/encryption-utils";
 import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SERVER_URL = getServerURL("DidLinkage")
+const SERVER_URL = getServerURL("VeridaDIDLinkage")
 
 let server
 
@@ -198,7 +198,7 @@ describe("DIDLinkage Tests", () => {
     before(async () => {
         signInfo = await generateProof()
         // console.log("SignInfo : ", signInfo)
-        server = await getAxios("DidLinkage")
+        server = await getAxios("VeridaDIDLinkage")
     })
 
     describe("Link", () => {

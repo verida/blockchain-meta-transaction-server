@@ -6,7 +6,7 @@ import { generateProof, SignInfo } from './utils-keyring'
 import { Keyring } from "@verida/keyring";
 import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SERVER_URL = getServerURL("SBT")
+const SERVER_URL = getServerURL("SoulboundNFT")
 
 const getNonce = async (did: string) => {
     const response: any = await server.post(
@@ -141,7 +141,7 @@ describe("SBT Tests", () => {
     const diffId = "-diffId" + Wallet.createRandom().address;
    
     before( async () => {
-        server = await getAxios("SBT")
+        server = await getAxios("SoulboundNFT")
     })
 
     describe("Claim SBT", () => {

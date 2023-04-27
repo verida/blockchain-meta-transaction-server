@@ -1,8 +1,7 @@
-import { Console } from 'console';
 import { Request, Response } from 'express'
 import { getCurrentNet } from './helpers'
 
-import { ContractFactory } from '@ethersproject/contracts'
+import { Contract } from '@ethersproject/contracts'
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet'
 import { BigNumber } from 'ethers';
@@ -87,11 +86,9 @@ export default class GenericController {
      */
     private static async callContractFunction(abi: any, address: string, abiMethod: any, finalParams: any) {
         console.info(`callContractFunction(${abiMethod})`)
+        
+        const contract = new Contract(address, abi.abi, txSigner);
 
-        const contract = ContractFactory.fromSolidity(abi)
-            .attach(address)
-            .connect(provider)
-            .connect(txSigner)
         let ret;
         
         try {
