@@ -1590,6 +1590,15 @@
     copyfiles "^2.4.1"
     ethers "5.5.1"
 
+"@verida/vda-common@^2.3.3-rc1":
+  version "2.3.3-rc1"
+  resolved "https://registry.yarnpkg.com/@verida/vda-common/-/vda-common-2.3.3-rc1.tgz#3f26aec4836b5587db5775bd18bb5e8b7c9cfa70"
+  integrity sha512-KLOAJH19XYGMWKGRBoMhoVz2OwFaLbodBrVKS0U8DmxqErXo39suMetQuTmMwcdVlaqTKgz4i9ScW1V9Xdcssg==
+  dependencies:
+    "@verida/encryption-utils" "^2.2.1"
+    copyfiles "^2.4.1"
+    ethers "5.5.1"
+
 "@verida/vda-did-resolver@^2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@verida/vda-did-resolver/-/vda-did-resolver-2.3.1.tgz#57235cdf65626f0afa6c08753177c69d913243b9"
