@@ -20,7 +20,8 @@ require('dotenv').config()
 const privateKey = process.env.PRIVATE_KEY;
 
 const targetNet = getCurrentNet();
-const rpcURL = getDefaultRpcUrl(targetNet);
+// Force an RPC URL if it is specified in the environment variables
+const rpcURL = process.env.RPC_URL ? process.env.RPC_URL : getDefaultRpcUrl(targetNet);
 
 const provider = new JsonRpcProvider(rpcURL);
 const txSigner = new Wallet(privateKey, provider)
