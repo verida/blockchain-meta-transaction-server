@@ -1,12 +1,18 @@
-import { Console } from 'console';
 import { Request, Response } from 'express'
-import { getCurrentNet, getRPCURLofNet } from './helpers'
+import { getCurrentNet } from './helpers'
 
-import { ContractFactory } from '@ethersproject/contracts'
+import { Contract } from '@ethersproject/contracts'
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet'
 import { BigNumber } from 'ethers';
-import { CONTRACT_ADDRESS, CONTRACT_ADDRESS_TESTNET } from './const';
+
+import {
+     CONTRACT_ABI, 
+     CONTRACT_NAMES, 
+     CONTRACT_ADDRESS,
+     getDefaultRpcUrl
+    } from "@verida/vda-common"
+import Config from './config'
 
 require('dotenv').config()
 
@@ -14,13 +20,10 @@ require('dotenv').config()
 const privateKey = process.env.PRIVATE_KEY;
 
 const targetNet = getCurrentNet();
-const rpcURL = getRPCURLofNet(targetNet);
+const rpcURL = getDefaultRpcUrl(targetNet);
 
 const provider = new JsonRpcProvider(rpcURL);
 const txSigner = new Wallet(privateKey, provider)
-
-/** Function parameter type. Defined in config.ts file for each smart contract */
-type fnParameterConfig = (paramName: any, paramData: any) => any
 
 /**
  * Class that process incoming http requests
@@ -28,12 +31,12 @@ type fnParameterConfig = (paramName: any, paramData: any) => any
 export default class GenericController {
     /**
      * Parse parameters from http request body and convert them affordable to smart contract
+     * @param contractName - Contract name
      * @param req - HTTP request
      * @param abiMethod - method infor extracted from contract abi file
-     * @param fnConfig - Function parameter that adjust request parameters affordable to smart contract
      * @returns 
      */
-    private static parseParams(req:Request, abiMethod:any, fnConfig: fnParameterConfig) : any | never {
+    private static parseParams(contractName:CONTRACT_NAMES, req:Request, abiMethod:any) : any | never {
         // Loop through all the parameters and convert to the correct type
         const finalParams :  any[]= [];
         try {
@@ -63,7 +66,7 @@ export default class GenericController {
                     paramData = req.body['param_' + paramIndex]
                     paramIndex++;
                 }
-                // finalParams.push(fnConfig(param.name, paramData))
+                // finalParams.push(Config.customParams(contractName, param.name, paramData))
                 finalParams.push(paramData)
             })
         } catch(e: any) {
@@ -83,11 +86,9 @@ export default class GenericController {
      */
     private static async callContractFunction(abi: any, address: string, abiMethod: any, finalParams: any) {
         console.info(`callContractFunction(${abiMethod})`)
+        
+        const contract = new Contract(address, abi.abi, txSigner);
 
-        const contract = ContractFactory.fromSolidity(abi)
-            .attach(address)
-            .connect(provider)
-            .connect(txSigner)
         let ret;
         
         try {
@@ -123,23 +124,23 @@ export default class GenericController {
      * @param {*} res - http response object
      */
     public static async contract(req: Request, res: Response) {
-        const { contract, method } = req.params
+        let { contract, method } = req.params
         let contractJson: any
-        let config: any
 
         // @todo: try / catch to check if invalid contract specified
         try {
-            contractJson = require(`./contracts/${contract}/abi.json`)
-            // const config = require(`./contracts/${contract}/config`)
-            config = (await import(`./contracts/${contract}/config`)).default
-            // console.log("GenericController config = ", config)
+            contractJson = CONTRACT_ABI[contract as CONTRACT_NAMES];
+
+            if (!contractJson) {
+                throw new Error(`Unable to locate contract ABI (${contract})`)
+            }
         } catch (e) {
             console.error('contract() error:')
             console.error(e)
 
             return res.status(400).send({
                 success: false,
-                error: 'Invalid contract'
+                error: `Invalid contract (${contract})`
             })
         }
 
@@ -166,7 +167,7 @@ export default class GenericController {
             // Check RequestValidity if calling function is not View type.
             // console.log("Checking request validity");
             
-            const isValid = await config.isRequestValid(req)
+            const isValid = await Config.isRequestValid(contract as CONTRACT_NAMES, req)
             if (!isValid) {
                 return res.status(400).send({
                     // status: "fail",
@@ -180,7 +181,11 @@ export default class GenericController {
 
         let finalParams : any
         try {
-            finalParams = GenericController.parseParams(req, abiMethod, config.customParams)
+            finalParams = GenericController.parseParams(
+                contract as CONTRACT_NAMES,
+                req, 
+                abiMethod
+            )
         } catch (e) {
             // console.log("***ParseParam Failed", e)
             return res.status(200).send({
@@ -192,9 +197,7 @@ export default class GenericController {
 
         // @todo: actually call the smart contract
         // const address = config.getContractAddress()
-        const address = getCurrentNet() === 'RPC_URL_POLYGON_MAINNET' ? 
-                CONTRACT_ADDRESS[contract] :
-                CONTRACT_ADDRESS_TESTNET[contract]
+        const address = CONTRACT_ADDRESS[contract as CONTRACT_NAMES][targetNet];
 
         let ret;
         try {
@@ -213,7 +216,7 @@ export default class GenericController {
                 reason
             })
         }
-``
+
         return res.status(200).send({
             success: true,
             data: ret // finalParams

@@ -1,59 +1,18 @@
 const assert = require("assert")
-import Axios from 'axios'
-
 import { formatBytes32String } from "ethers/lib/utils";
 import EncryptionUtils from "@verida/encryption-utils";
 import { ethers, Wallet } from 'ethers'
+import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-import dotenv from 'dotenv'
-dotenv.config()
-
-const SENDER_CONTEXT = 'Verida Test: Any sending app'
-
-const getAxios = async () => {
-    const config: any = {
-        headers: {
-            "context-name": SENDER_CONTEXT,
-        },
-    }
-
-    /*
-    context = await Network.connect({
-        context: {
-            name: SENDER_CONTEXT
-        },
-        client: {
-            environment: VERIDA_ENVIRONMENT
-        },
-        account
-    })
-    */
-
-    /*
-    SENDER_DID = (await account.did()).toLowerCase()
-    const keyring = await account.keyring(SENDER_CONTEXT)
-    SENDER_SIG = await keyring.sign(`Access the "generic" service using context: "${SENDER_CONTEXT}"?\n\n${SENDER_DID}`)
-    
-    config["auth"] = {
-        username: SENDER_DID.replace(/:/g, "_"),
-        password: SENDER_SIG,
-    }*/
-    
-    return Axios.create(config)
-}
-
-const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-const SERVER_URL_HOME = `http://localhost:${PORT}`
-const SERVER_URL = `http://localhost:${PORT}/NameRegistry`
-// const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/NameRegistry`
+const SERVER_URL = getServerURL("NameRegistry")
 
 let server
 
 const testNames = [
-    "helloworld1.verida",
-    "hello----world--1.verida",
-    "hello_world-dave1.verida",
-    "JerrySmith1.verida",
+    "helloworld1.vda",
+    "hello----world--1.vda",
+    "hello_world-dave1.vda",
+    "JerrySmith1.vda",
 
     "JerrySmith1.test",
     "Billy1.test",
@@ -86,19 +45,11 @@ const dids = [
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-
-// Authentication header for http requests
-const auth_header = {
-    headers: {
-        'user-agent': 'Verida-Vault'
-    }
-}
-
 const checkFunctionCall = async (fnName: string, isSuccess: boolean, param: any) => {
     const response: any = await server.post(
         SERVER_URL + `/${fnName}`, 
         param, 
-        auth_header                        
+        AUTH_HEADER                        
     )
     assert.ok(response && response.data, 'Have a response')
 
@@ -111,7 +62,7 @@ const getFunctionResult = async (fnName: string, param: any) => {
     const response: any = await server.post(
         SERVER_URL + `/${fnName}`, 
         param, 
-        auth_header                        
+        AUTH_HEADER                        
     )
     return response.data.data
 }
@@ -122,7 +73,7 @@ const getNonce = async (did: string) => {
         {
             did,
         }, 
-        auth_header                        
+        AUTH_HEADER                        
     )
     // console.log("GetNonce Result : ", did, response.data)
     if (!response.data.success)
@@ -161,7 +112,7 @@ const getRegisterSignature = async (name: string, did: WalletInterface) => {
 describe("NameRegistry Tests", function() {
     before(async () =>{
         this.timeout(100000)
-        server = await getAxios()
+        server = await getAxios("NameRegistry")
     })
 
     describe("Register()",async () => {
@@ -178,7 +129,7 @@ describe("NameRegistry Tests", function() {
         })
 
         it("Should fail : Invalid character specified in names", async () => {
-            const invalidnames = ["hello world.verida", "hello!world.verida"];
+            const invalidnames = ["hello world.vda", "hello!world.vda"];
             for (let i = 0; i < invalidnames.length; i++) {
                 const name = invalidnames[i];
                 const signature = await getRegisterSignature(name, dids[0]);
@@ -195,7 +146,7 @@ describe("NameRegistry Tests", function() {
         })
 
         it("Should fail : . not permitted", async () => {
-            const invalidnames = ["david.test.verida", "hello..verida"];
+            const invalidnames = ["david.test.vda", "hello..vda"];
             for (let i = 0; i < invalidnames.length; i++) {
                 const name = invalidnames[i];
                 const signature = await getRegisterSignature(name, dids[0]);

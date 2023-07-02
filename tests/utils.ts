@@ -1,7 +1,7 @@
 // Common test data to test DIDRegistry
 // Shared between library tests
 import EncryptionUtils from '@verida/encryption-utils'
-import { ethers, BigNumberish, Wallet } from 'ethers'
+import { ethers } from 'ethers'
 
 export const dids = [
   {
@@ -51,8 +51,6 @@ export const dids = [
   }
 ]
 
-export const zeroAddress = '0x0000000000000000000000000000000000000000'
-
 export const getVeridaSign = (rawMsg : any, privateKey: string ) => {
   const privateKeyArray = new Uint8Array(Buffer.from(privateKey.slice(2), 'hex'))
   return EncryptionUtils.signData(rawMsg, privateKeyArray)
@@ -63,12 +61,6 @@ export const getVeridaSignWithNonce = (rawMsg : any, privateKey: string, nonce: 
     [rawMsg, nonce]
   )
   return getVeridaSign(rawMsg, privateKey)
-}
-
-export function sleep(ms) {
-  return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-  });
 }
 
 export type fnGetNonceType = () => Promise<number>

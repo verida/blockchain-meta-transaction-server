@@ -1,59 +1,12 @@
 const assert = require("assert")
-import Axios from 'axios'
 
-import dotenv from 'dotenv'
 import { ethers, Wallet } from 'ethers'
-dotenv.config()
-
 import { generateProof, SignInfo } from './utils-keyring'
-import EncryptionUtils from "@verida/encryption-utils";
 
 import { Keyring } from "@verida/keyring";
+import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SENDER_CONTEXT = 'Verida Test: Any sending app'
-
-const getAxios = async () => {
-    const config: any = {
-        headers: {
-            "context-name": SENDER_CONTEXT,
-        },
-    }
-
-    /*
-    context = await Network.connect({
-        context: {
-            name: SENDER_CONTEXT
-        },
-        client: {
-            environment: VERIDA_ENVIRONMENT
-        },
-        account
-    })
-    */
-
-    /*
-    SENDER_DID = (await account.did()).toLowerCase()
-    const keyring = await account.keyring(SENDER_CONTEXT)
-    SENDER_SIG = await keyring.sign(`Access the "generic" service using context: "${SENDER_CONTEXT}"?\n\n${SENDER_DID}`)
-    
-    config["auth"] = {
-        username: SENDER_DID.replace(/:/g, "_"),
-        password: SENDER_SIG,
-    }*/
-    
-    return Axios.create(config)
-}
-
-const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-const SERVER_URL = `http://localhost:${PORT}/SoulboundNFT`
-//const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/SoulboundNFT`
-
-// Authentication header for http requests
-const auth_header = {
-    headers: {
-        'user-agent': 'Verida-Vault'
-    }
-}
+const SERVER_URL = getServerURL("SoulboundNFT")
 
 const getNonce = async (did: string) => {
     const response: any = await server.post(
@@ -61,7 +14,7 @@ const getNonce = async (did: string) => {
         {
             did,
         }, 
-        auth_header                        
+        AUTH_HEADER                        
     )
     // console.log("GetNonce Result : ", did, response.data)
     if (!response.data.success)
@@ -129,7 +82,7 @@ const callClaimSBTAPI = async (
             requestSignature,
             requestProof: signInfo.userProof!
         },
-        auth_header
+        AUTH_HEADER
     )
 
     assert.ok(response && response.data, 'Have a response')
@@ -146,7 +99,7 @@ const callTokenInfoAPI = async (
         {
             tokenId
         },
-        auth_header
+        AUTH_HEADER
     )
 
     assert.ok(response && response.data, 'Have a response')
@@ -160,7 +113,7 @@ const callTotalSupply = async() => {
     const response = await server.post(
         SERVER_URL + "/totalSupply",
         {},
-        auth_header
+        AUTH_HEADER
     )
 
     assert.ok(response && response.data, 'Have a response')
@@ -180,8 +133,6 @@ const tokenURIs = [
     "https://gateway.pinata.cloud/ipfs/QmVrTkbrzNHRhmsh88XnwJo5gBu8WqQMFTkVB4KoVLxSEY/3.json",
 ]
 
-const zeroAddress = "0x0000000000000000000000000000000000000000"
-
 // Verida Test Account
 const claimer = '0x8f6473D72d4b51B7b6147F6C6C0CC3F833d96B7a'
 
@@ -190,7 +141,7 @@ describe("SBT Tests", () => {
     const diffId = "-diffId" + Wallet.createRandom().address;
    
     before( async () => {
-        server = await getAxios()
+        server = await getAxios("SoulboundNFT")
     })
 
     describe("Claim SBT", () => {
@@ -205,10 +156,7 @@ describe("SBT Tests", () => {
         it("Claimed one SBT", async () => {
             // contract.addTrustedSigner(signInfo.signerAddress)
 
-            const msg = ethers.utils.solidityPack(
-                ['string','address'],
-                [`${sbtType}-${uniqueId}-`, signInfo.userAddress]
-            )
+            const msg = `${sbtType}-${uniqueId}-${signInfo.userAddress.toLowerCase()}`
             const signedData = await signInfo.signKeyring.sign(msg)
             
             await callClaimSBTAPI(
@@ -223,11 +171,7 @@ describe("SBT Tests", () => {
 
         it("Claimed same SBT type with different ID", async () => {
             
-            const msg = ethers.utils.solidityPack(
-                ['string','address'],
-                [`${sbtType}-${diffId}-`, signInfo.userAddress]
-            )
-
+            const msg = `${sbtType}-${diffId}-${signInfo.userAddress.toLowerCase()}`
             const signedData = await signInfo.signKeyring.sign(msg)
 
             await callClaimSBTAPI(

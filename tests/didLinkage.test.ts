@@ -1,59 +1,13 @@
 const assert = require("assert")
-import Axios from 'axios'
 
-import dotenv from 'dotenv'
 import { ethers, Wallet } from 'ethers'
-dotenv.config()
-
 import { generateProof, SignInfo } from './utils-keyring'
 import EncryptionUtils from "@verida/encryption-utils";
+import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SENDER_CONTEXT = 'Verida Test: Any sending app'
-
-const getAxios = async () => {
-    const config: any = {
-        headers: {
-            "context-name": SENDER_CONTEXT,
-        },
-    }
-
-    /*
-    context = await Network.connect({
-        context: {
-            name: SENDER_CONTEXT
-        },
-        client: {
-            environment: VERIDA_ENVIRONMENT
-        },
-        account
-    })
-    */
-
-    /*
-    SENDER_DID = (await account.did()).toLowerCase()
-    const keyring = await account.keyring(SENDER_CONTEXT)
-    SENDER_SIG = await keyring.sign(`Access the "generic" service using context: "${SENDER_CONTEXT}"?\n\n${SENDER_DID}`)
-    
-    config["auth"] = {
-        username: SENDER_DID.replace(/:/g, "_"),
-        password: SENDER_SIG,
-    }*/
-    
-    return Axios.create(config)
-}
-
-const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
-const SERVER_URL = `http://localhost:${PORT}/VeridaDIDLinkage`
-//const SERVER_URL = `https://meta-tx-server1.tn.verida.tech/VeridaDIDLinkage`
+const SERVER_URL = getServerURL("VeridaDIDLinkage")
 
 let server
-
-// Authentication header for http requests
-const auth_header = {
-    headers: {
-        'user-agent': 'Verida-Vault'
-    }
-}
 
 const getNonce = async (did: string) => {
     const response: any = await server.post(
@@ -61,7 +15,7 @@ const getNonce = async (did: string) => {
         {
             did,
         }, 
-        auth_header                        
+        AUTH_HEADER                        
     )
     // console.log("GetNonce Result : ", did, response.data)
     if (!response.data.success)
@@ -141,7 +95,7 @@ const callLinkAPI = async (
             requestSignature,
             requestProof: signInfo.userProof!
         },
-        auth_header
+        AUTH_HEADER
     )
 
     assert.ok(response && response.data, 'Have a response')
@@ -159,7 +113,7 @@ const callIsLinkedAPI = async (
             did,
             identifier
         },
-        auth_header
+        AUTH_HEADER
     )
     
     assert.ok(response && response.data, 'Have a response')
@@ -177,7 +131,7 @@ const callLookupAPI = async(
         {
             identifier
         },
-        auth_header
+        AUTH_HEADER
     )
     
     assert.ok(response && response.data, 'Have a response')
@@ -197,7 +151,7 @@ const callGetLinksAPI = async(
         {
             did
         },
-        auth_header
+        AUTH_HEADER
     )
     
     assert.ok(response && response.data, 'Have a response')
@@ -221,7 +175,7 @@ const callUnlinkAPI = async(
             requestSignature,
             requestProof: signInfo.userProof!
         },
-        auth_header
+        AUTH_HEADER
     )
     
     assert.ok(response && response.data, 'Have a response')
@@ -244,7 +198,7 @@ describe("DIDLinkage Tests", () => {
     before(async () => {
         signInfo = await generateProof()
         // console.log("SignInfo : ", signInfo)
-        server = await getAxios()
+        server = await getAxios("VeridaDIDLinkage")
     })
 
     describe("Link", () => {
@@ -300,7 +254,7 @@ describe("DIDLinkage Tests", () => {
                         requestSignature: '0x13',
                         requestProof: '0x13'
                     },
-                    auth_header
+                    AUTH_HEADER
                 )
             
                 assert.ok(response && response.data, 'Have a response')
@@ -381,7 +335,7 @@ describe("DIDLinkage Tests", () => {
                     requestSignature: "0x12",
                     requestProof: "0x12"
                 },
-                auth_header
+                AUTH_HEADER
             )
             
             assert.ok(response && response.data, 'Have a response')

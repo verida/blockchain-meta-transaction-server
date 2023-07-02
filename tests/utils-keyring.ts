@@ -1,12 +1,15 @@
-import { DIDClient, DIDClientConfig } from "@verida/did-client"
+import { DIDClient } from "@verida/did-client"
 import { AutoAccount } from "@verida/account-node";
-import { Client, EnvironmentType } from "@verida/client-ts";
+import { Client } from "@verida/client-ts";
+import { DIDClientConfig, EnvironmentType } from "@verida/types";
 
 // import { Wallet } from '@ethersproject/wallet'
 import { Wallet } from "ethers"
 import { JsonRpcProvider } from '@ethersproject/providers'
 
 import { Keyring } from "@verida/keyring";
+import dotenv from 'dotenv'
+dotenv.config()
 
 if (process.env.PRIVATE_KEY === undefined) {
     throw new Error('PRIVATE_KEY not defined in env')
@@ -25,7 +28,7 @@ const txSigner = new Wallet(privateKey, provider)
 export async function getDIDClient(veridaAccount: Wallet) {
     
     const config: DIDClientConfig = {
-        network: 'testnet',
+        network: EnvironmentType.TESTNET,
         rpcUrl: rpcUrl
     }
 
@@ -72,23 +75,8 @@ export async function getDIDClient(veridaAccount: Wallet) {
     return didClient
 }
 
-const DEFAULT_ENDPOINTS = [
-    'https://node1-apse2.devnet.verida.tech/did/', 
-    // 'https://node1-apse2.devnet.verida.tech/did/', 
-    'https://node3-apse2.devnet.verida.tech/did/'
-]
-
 export async function initVerida(didwallet: Wallet, CONTEXT_NAME: string) {
     const account = new AutoAccount({
-        defaultDatabaseServer: {
-            type: 'VeridaDatabase',
-            endpointUri: DEFAULT_ENDPOINTS
-        },
-        defaultMessageServer: {
-            type: 'VeridaMessage',
-            endpointUri: DEFAULT_ENDPOINTS
-        },
-    }, {
         privateKey: didwallet.privateKey,
         environment: EnvironmentType.TESTNET,
         didClientConfig: {
@@ -96,14 +84,14 @@ export async function initVerida(didwallet: Wallet, CONTEXT_NAME: string) {
             web3Config: {
                 privateKey,
                 rpcUrl
-            },
-            didEndpoints: DEFAULT_ENDPOINTS
+            }
         }
     })
 
     const client = new Client({
         environment: EnvironmentType.TESTNET,
         didClientConfig: {
+            network: EnvironmentType.TESTNET,
             rpcUrl
         }
     })
