@@ -42,8 +42,8 @@
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/node": "^18.15.11",
-    "@verida/account-node": "^2.3.4",
-    "@verida/client-ts": "^2.3.4",
+    "@verida/account-node": "^2.4.0-rc2",
+    "@verida/client-ts": "^2.4.0-rc2",
     "@verida/did-client": "^2.3.4",
     "@verida/encryption-utils": "^2.2.1",
     "@verida/types": "^2.3.1",
