@@ -18,6 +18,7 @@ custom:
 provider:
   name: aws
   runtime: nodejs14.x
+  timeout: 30
   stage: ${opt:stage, 'testnet'}
   endpointType: regional
   logs:
