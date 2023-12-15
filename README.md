@@ -89,7 +89,9 @@ RPC_URL_POLYGON_TESTNET
 
 ## Lambda configuration
 
-1. Ensure timeout is set to `20` seconds for API gateway and the lambda. Otherwise you may see `Service Unavailable` or weird `Invalid signature` errors when things timeout.
+1. Ensure timeout is set to `30` seconds for API gateway and the lambda. Otherwise you may see `Service Unavailable` or weird `Invalid signature` errors when things timeout.
+
+2. Make sure the SSL certificate is created in us-east-1 even if deploying elsewhere. 
 
 # Returns of Meta-transaction-Server
 

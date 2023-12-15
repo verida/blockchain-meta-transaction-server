@@ -9,6 +9,7 @@
     "start": "sls offline start --stage offline",
     "tests": "ts-mocha './tests/**/*.ts'",
     "test": "ts-mocha --timeout 100000",
+    "mainnet-deploy": "yarn build && sls create_domain --stage mainnet --config mainnet.serverless.yml && sls deploy --stage mainnet --config mainnet.serverless.yml",
     "testnet-deploy": "yarn build && sls create_domain --stage testnet && sls deploy --stage testnet",
     "devnet-deploy": "yarn build && sls create_domain --stage devnet && sls deploy --stage devnet"
   },

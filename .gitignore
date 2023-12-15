@@ -6,3 +6,4 @@ dist/
 *.log
 .serverless/
 .env
+.DS_Store

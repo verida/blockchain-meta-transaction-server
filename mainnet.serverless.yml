@@ -1,0 +1,40 @@
+service: blockchain-meta-transaction-server
+
+custom:
+  stage: ${opt:stage, 'mainnet'}
+  region: ${opt:region, 'us-east-2'}
+  serverless-offline:
+    httpPort: 5021
+    noPrependStageInUrl: true
+  customDomain:
+    domainName: ${opt:stage, 'mainnet'}-meta-tx-server.myrtle.verida.tech
+    basePath: ''
+    certificateName: '*.myrtle.verida.tech'
+    stage: ${opt:stage, 'mainnet'}                                       
+    endpointType: regional
+    createRoute53Record: true
+    apiType: http
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  timeout: 30
+  stage: ${opt:stage, 'mainnet'}
+  endpointType: regional
+  logs:
+    httpApi: true
+  httpApi:
+    metrics: true
+    cors: true
+ 
+functions:
+  useContract:
+    handler: dist/server.handler
+    events:
+      - httpApi:
+          path: '/{proxy+}'
+          method: '*'
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+  - serverless-domain-manager
