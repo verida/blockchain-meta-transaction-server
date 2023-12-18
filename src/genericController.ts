@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { getCurrentNet } from './helpers'
+import { getCurrentNet, getMaticFee } from './helpers'
 
 import { Contract } from '@ethersproject/contracts'
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -25,6 +25,9 @@ const rpcURL = process.env.RPC_URL ? process.env.RPC_URL : getDefaultRpcUrl(targ
 
 const provider = new JsonRpcProvider(rpcURL);
 const txSigner = new Wallet(privateKey, provider)
+
+const eip1559gasStationUrl = process.env.eip1559gasStationUrl ? process.env.eip1559gasStationUrl : undefined
+const eip1559Mode = process.env.eip1559Mode ? process.env.eip1559Mode : undefined
 
 /**
  * Class that process incoming http requests
@@ -99,6 +102,14 @@ export default class GenericController {
             } 
             else {
                 // Make transaction
+                if (eip1559gasStationUrl && eip1559Mode) {
+                    console.log(eip1559gasStationUrl, eip1559Mode)
+                    const gasConfig = await getMaticFee(eip1559gasStationUrl, eip1559Mode);
+                    console.log(gasConfig)
+                    finalParams.push(gasConfig)
+                }
+                
+                console.log(finalParams)
                 const transaction = await contract.functions[abiMethod.name](...finalParams)
                 
                 ret = await transaction.wait(1)
