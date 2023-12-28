@@ -103,15 +103,11 @@ export default class GenericController {
             else {
                 // Make transaction
                 if (eip1559gasStationUrl && eip1559Mode) {
-                    console.log(eip1559gasStationUrl, eip1559Mode)
                     const gasConfig = await getMaticFee(eip1559gasStationUrl, eip1559Mode);
-                    console.log(gasConfig)
                     finalParams.push(gasConfig)
                 }
-                
-                console.log(finalParams)
-                const transaction = await contract.functions[abiMethod.name](...finalParams)
-                
+
+                const transaction = await contract.functions[abiMethod.name](...finalParams)                
                 ret = await transaction.wait(1)
                 // console.log(`Transaction`, transaction)
                 // console.log(`Receipt`, ret)
