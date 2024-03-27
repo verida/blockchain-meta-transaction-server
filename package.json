@@ -9,7 +9,7 @@
     "start": "sls offline start --stage offline",
     "tests": "ts-mocha './tests/**/*.ts'",
     "test": "ts-mocha --timeout 100000",
-    "mainnet-deploy": "export AWS_PROFILE=verida-testnet && yarn build && sls create_domain --stage mainnet --config mainnet.serverless.yml && sls deploy --stage mainnet --config mainnet.serverless.yml",
+    "mainnet-deploy": "export AWS_PROFILE=verida-mainnet && yarn build && sls create_domain --stage mainnet --config mainnet.serverless.yml && sls deploy --stage mainnet --config mainnet.serverless.yml",
     "testnet-deploy": "export AWS_PROFILE=verida-testnet && yarn build && sls create_domain --stage testnet && sls deploy --stage testnet",
     "devnet-deploy": "export AWS_PROFILE=verida-testnet && yarn build && sls create_domain --stage devnet && sls deploy --stage devnet"
   },
