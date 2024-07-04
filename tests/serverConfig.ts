@@ -1,6 +1,6 @@
+import { TContractNames } from '@verida/types';
 import Axios from 'axios'
 import dotenv from 'dotenv'
-import { CONTRACT_NAMES } from '@verida/vda-common'
 dotenv.config()
 
 const PORT = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5021;
@@ -11,7 +11,7 @@ export const AUTH_HEADER = {
     }
 }
 
-export function getServerURL(contractName: CONTRACT_NAMES, isDebug = true) {
+export function getServerURL(contractName: TContractNames, isDebug = true) {
     if (isDebug) {
         return `http://localhost:${PORT}/${contractName}`
     } else {
@@ -20,7 +20,7 @@ export function getServerURL(contractName: CONTRACT_NAMES, isDebug = true) {
 }
 
 
-export const getAxios = async (contractName : CONTRACT_NAMES) => {
+export const getAxios = async (contractName : TContractNames) => {
     const SENDER_CONTEXT = `Verida Test: Meta-Transaction-Server (${contractName})`
 
     const config: any = {

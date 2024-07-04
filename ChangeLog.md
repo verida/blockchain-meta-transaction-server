@@ -1,3 +1,10 @@
+2024-07-04 ()
+--------------------
+
+- Update after refactoring DIDs in the `verida-js` packages
+- Code updated
+- Test code updated
+
 2023-04-21 (1.1.0)
 --------------------
 

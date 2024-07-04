@@ -8,11 +8,11 @@ import { BigNumber } from 'ethers';
 
 import {
      CONTRACT_ABI, 
-     CONTRACT_NAMES, 
-     CONTRACT_ADDRESS,
+     getContractInfoForBlockchainAnchor, 
      getDefaultRpcUrl
     } from "@verida/vda-common"
 import Config from './config'
+import { TContractNames } from '@verida/types';
 
 require('dotenv').config()
 
@@ -37,10 +37,10 @@ export default class GenericController {
      * Parse parameters from http request body and convert them affordable to smart contract
      * @param contractName - Contract name
      * @param req - HTTP request
-     * @param abiMethod - method infor extracted from contract abi file
+     * @param abiMethod - method info extracted from contract abi file
      * @returns 
      */
-    private static parseParams(contractName:CONTRACT_NAMES, req:Request, abiMethod:any) : any | never {
+    private static parseParams(contractName:TContractNames, req:Request, abiMethod:any) : any | never {
         // Loop through all the parameters and convert to the correct type
         const finalParams :  any[]= [];
         try {
@@ -137,7 +137,7 @@ export default class GenericController {
 
         // @todo: try / catch to check if invalid contract specified
         try {
-            contractJson = CONTRACT_ABI[contract as CONTRACT_NAMES];
+            contractJson = CONTRACT_ABI[contract as TContractNames];
 
             if (!contractJson) {
                 throw new Error(`Unable to locate contract ABI (${contract})`)
@@ -175,7 +175,7 @@ export default class GenericController {
             // Check RequestValidity if calling function is not View type.
             // console.log("Checking request validity");
             
-            const isValid = await Config.isRequestValid(contract as CONTRACT_NAMES, req)
+            const isValid = await Config.isRequestValid(contract as TContractNames, req)
             if (!isValid) {
                 return res.status(400).send({
                     // status: "fail",
@@ -190,7 +190,7 @@ export default class GenericController {
         let finalParams : any
         try {
             finalParams = GenericController.parseParams(
-                contract as CONTRACT_NAMES,
+                contract as TContractNames,
                 req, 
                 abiMethod
             )
@@ -205,7 +205,7 @@ export default class GenericController {
 
         // @todo: actually call the smart contract
         // const address = config.getContractAddress()
-        const address = CONTRACT_ADDRESS[contract as CONTRACT_NAMES][targetNet];
+        const address = getContractInfoForBlockchainAnchor(targetNet, contract as TContractNames).address;
 
         let ret;
         try {

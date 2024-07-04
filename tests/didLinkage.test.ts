@@ -5,7 +5,7 @@ import { generateProof, SignInfo } from './utils-keyring'
 import EncryptionUtils from "@verida/encryption-utils";
 import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SERVER_URL = getServerURL("VeridaDIDLinkage")
+const SERVER_URL = getServerURL("didLinkage")
 
 let server
 
@@ -42,7 +42,6 @@ const getLinkRequestSignature = async(
     signedData: string, 
     signedProof: string) => 
 {
-    
     const nonce = await getNonce(didAddr)
 
     const rawMsg = ethers.utils.solidityPack(
@@ -197,8 +196,8 @@ describe("DIDLinkage Tests", () => {
 
     before(async () => {
         signInfo = await generateProof()
-        // console.log("SignInfo : ", signInfo)
-        server = await getAxios("VeridaDIDLinkage")
+        // console.log("didLinkage test - Before # SignInfo : ", signInfo)
+        server = await getAxios("didLinkage")
     })
 
     describe("Link", () => {
@@ -262,7 +261,7 @@ describe("DIDLinkage Tests", () => {
             }
         })
 
-        it("Success for 'Trusted' signer type", async () => {
+        it.only("Success for 'Trusted' signer type", async () => {
             const identifier = identifiers[0]
             const { signedData, signedProof } = await getTrustedSignedData(signInfo.userAddress, identifier)
             
