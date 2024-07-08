@@ -24,13 +24,13 @@ if (rpcUrl === undefined) {
 const provider = new JsonRpcProvider(rpcUrl);
 const txSigner = new Wallet(privateKey, provider);
 
-const test_network = Network.DEVNET;
+const test_network = Network.BANKSIA;
 
 export async function getDIDClient(veridaAccount: Wallet) {
     
     const config: DIDClientConfig = {
         network: test_network,
-        rpcUrl: rpcUrl
+        rpcUrl
     }
 
     const didClient = new DIDClient(config)
@@ -144,10 +144,10 @@ export async function generateProof() : Promise<SignInfo> {
     const didClient = await signAccount.getDIDClient()
 
     const signerDoc = await didClient.get(signerDid)
-    const signerProof = signerDoc.locateContextProof(SIGN_CONTEXT_NAME)
+    const signerProof = signerDoc.locateContextProof(SIGN_CONTEXT_NAME, test_network)
 
     const userDoc = await didClient.get(userDid)
-    const userProof = userDoc.locateContextProof(USER_CONTEXT_NAME)
+    const userProof = userDoc.locateContextProof(USER_CONTEXT_NAME, test_network)
 
     return {
         signKeyring,

@@ -182,8 +182,8 @@ const callUnlinkAPI = async(
 }
 
 
-describe("DIDLinkage Tests", () => {
-
+describe("DIDLinkage Tests", function() {
+    this.timeout(200*1000)
     const eip155Signer = Wallet.createRandom()
 
     const identifiers = [
