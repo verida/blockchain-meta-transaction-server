@@ -2,12 +2,12 @@ import { DIDClient } from "@verida/did-client"
 import { AutoAccount } from "@verida/account-node";
 import { Client } from "@verida/client-ts";
 import { DIDClientConfig, Network } from "@verida/types";
+import { Keyring } from "@verida/keyring";
 
 // import { Wallet } from '@ethersproject/wallet'
 import { Wallet } from "ethers"
 import { JsonRpcProvider } from '@ethersproject/providers'
 
-import { Keyring } from "@verida/keyring";
 import dotenv from 'dotenv'
 dotenv.config()
 

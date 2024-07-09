@@ -82,6 +82,10 @@ const callLinkAPI = async (
         signedProof
     )
 
+    // console.log("didAddr: ", signInfo.userAddress)
+    // console.log("info: ", {identifier, signedData, signedProof });
+    // console.log(requestSignature, signInfo.userProof);
+    
     const response = await server.post(
         SERVER_URL + "/link",
         {
@@ -181,9 +185,12 @@ const callUnlinkAPI = async(
     assert.equal(response.data.success, isSuccessful, 'Have a success response')
 }
 
-
+/**
+ * !!! Notes: Should add identifier types & signinfo.signerAddress by the contract owner before testing
+ * Otherwise, test would be failed
+ */
 describe("DIDLinkage Tests", function() {
-    this.timeout(200*1000)
+    this.timeout(300*1000)
     const eip155Signer = Wallet.createRandom()
 
     const identifiers = [
@@ -196,7 +203,6 @@ describe("DIDLinkage Tests", function() {
 
     before(async () => {
         signInfo = await generateProof()
-        // console.log("didLinkage test - Before # SignInfo : ", signInfo)
         server = await getAxios("didLinkage")
     })
 
@@ -261,7 +267,7 @@ describe("DIDLinkage Tests", function() {
             }
         })
 
-        it.only("Success for 'Trusted' signer type", async () => {
+        it("Success for 'Trusted' signer type", async () => {
             const identifier = identifiers[0]
             const { signedData, signedProof } = await getTrustedSignedData(signInfo.userAddress, identifier)
             
