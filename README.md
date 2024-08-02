@@ -3,6 +3,12 @@
 **Verida meta-transaction-server** provide Http GET & POST endpoints for interactions to smart contracts of Verida.
 Every contract developers in **Verida** can create supports for his contract.
 
+## Dependency
+This package depends on the following Verida packages
+- `@verida/types`
+- `@verida/vda-common`
+
+
 ## Add support for individual contract
 
 ### 1. Deploy smart contract to targeting net

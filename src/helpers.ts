@@ -2,15 +2,23 @@ require('dotenv').config()
 
 import { ethers } from 'ethers';
 import Axios from 'axios';
+import { BlockchainAnchor } from '@verida/types';
 
 /**
  * Get targeting net name of this server.
  * Read value from .env file.
  * @returns Blockchain name
  */
-export function getCurrentNet() {
-  const defaultNet = "testnet";
-  return process.env.RPC_TARGET_NET != undefined ? process.env.RPC_TARGET_NET :  defaultNet;
+export function getCurrentNet() : BlockchainAnchor {
+  const strChain = process.env.RPC_TARGET_NET ?? "polamoy";
+  switch (strChain) {
+    case "mainnet":
+    case "polpos":
+    case "0x89":
+      return BlockchainAnchor.POLPOS;
+    default:
+      return BlockchainAnchor.POLAMOY;
+  }
 }
 
 /**

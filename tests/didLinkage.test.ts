@@ -5,7 +5,7 @@ import { generateProof, SignInfo } from './utils-keyring'
 import EncryptionUtils from "@verida/encryption-utils";
 import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SERVER_URL = getServerURL("VeridaDIDLinkage")
+const SERVER_URL = getServerURL("didLinkage")
 
 let server
 
@@ -42,7 +42,6 @@ const getLinkRequestSignature = async(
     signedData: string, 
     signedProof: string) => 
 {
-    
     const nonce = await getNonce(didAddr)
 
     const rawMsg = ethers.utils.solidityPack(
@@ -83,6 +82,10 @@ const callLinkAPI = async (
         signedProof
     )
 
+    // console.log("didAddr: ", signInfo.userAddress)
+    // console.log("info: ", {identifier, signedData, signedProof });
+    // console.log(requestSignature, signInfo.userProof);
+    
     const response = await server.post(
         SERVER_URL + "/link",
         {
@@ -182,9 +185,12 @@ const callUnlinkAPI = async(
     assert.equal(response.data.success, isSuccessful, 'Have a success response')
 }
 
-
-describe("DIDLinkage Tests", () => {
-
+/**
+ * !!! Notes: Should add identifier types & signinfo.signerAddress by the contract owner before testing
+ * Otherwise, test would be failed
+ */
+describe("DIDLinkage Tests", function() {
+    this.timeout(300*1000)
     const eip155Signer = Wallet.createRandom()
 
     const identifiers = [
@@ -197,8 +203,7 @@ describe("DIDLinkage Tests", () => {
 
     before(async () => {
         signInfo = await generateProof()
-        // console.log("SignInfo : ", signInfo)
-        server = await getAxios("VeridaDIDLinkage")
+        server = await getAxios("didLinkage")
     })
 
     describe("Link", () => {

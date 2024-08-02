@@ -1,7 +1,7 @@
 const assert = require("assert")
 import Axios from 'axios'
-import { Network, Context } from '@verida/client-ts'
-import { AccountNodeDIDClientConfig, EnvironmentType, Web3CallType } from '@verida/types'
+import { Context } from '@verida/client-ts'
+import { AccountNodeDIDClientConfig, Network } from '@verida/types'
 import { AutoAccount } from '@verida/account-node'
 
 import dotenv from 'dotenv'
@@ -9,8 +9,6 @@ dotenv.config()
 
 const SENDER_CONTEXT = 'Verida Test: Any sending app'
 const SENDER_PRIVATE_KEY = '0x78d3b996ec98a9a536efdffbae40e5eaaf117765a587483c69195c9460165c37'
-
-const VERIDA_ENVIRONMENT = EnvironmentType.TESTNET
 
 const DID_CLIENT_CONFIG: AccountNodeDIDClientConfig = {
     callType: 'web3',
@@ -22,7 +20,7 @@ const DID_CLIENT_CONFIG: AccountNodeDIDClientConfig = {
 
 const account = new AutoAccount({
     privateKey: SENDER_PRIVATE_KEY, 
-    environment: VERIDA_ENVIRONMENT,
+    network: Network.DEVNET,
     didClientConfig: DID_CLIENT_CONFIG
 })
 

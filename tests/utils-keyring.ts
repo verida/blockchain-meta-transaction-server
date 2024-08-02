@@ -1,13 +1,13 @@
 import { DIDClient } from "@verida/did-client"
 import { AutoAccount } from "@verida/account-node";
 import { Client } from "@verida/client-ts";
-import { DIDClientConfig, EnvironmentType } from "@verida/types";
+import { DIDClientConfig, Network } from "@verida/types";
+import { Keyring } from "@verida/keyring";
 
 // import { Wallet } from '@ethersproject/wallet'
 import { Wallet } from "ethers"
 import { JsonRpcProvider } from '@ethersproject/providers'
 
-import { Keyring } from "@verida/keyring";
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -20,16 +20,17 @@ const rpcUrl = process.env[`RPC_URL`]
 if (rpcUrl === undefined) {
     throw new Error('RPC url is not defined in env')
 }
-console.log('RPC URL :', rpcUrl)
 
 const provider = new JsonRpcProvider(rpcUrl);
-const txSigner = new Wallet(privateKey, provider)
+const txSigner = new Wallet(privateKey, provider);
+
+const test_network = Network.BANKSIA;
 
 export async function getDIDClient(veridaAccount: Wallet) {
     
     const config: DIDClientConfig = {
-        network: EnvironmentType.TESTNET,
-        rpcUrl: rpcUrl
+        network: test_network,
+        rpcUrl
     }
 
     const didClient = new DIDClient(config)
@@ -78,7 +79,7 @@ export async function getDIDClient(veridaAccount: Wallet) {
 export async function initVerida(didwallet: Wallet, CONTEXT_NAME: string) {
     const account = new AutoAccount({
         privateKey: didwallet.privateKey,
-        environment: EnvironmentType.TESTNET,
+        network: test_network,
         didClientConfig: {
             callType: 'web3',
             web3Config: {
@@ -89,9 +90,9 @@ export async function initVerida(didwallet: Wallet, CONTEXT_NAME: string) {
     })
 
     const client = new Client({
-        environment: EnvironmentType.TESTNET,
+        network: test_network,
         didClientConfig: {
-            network: EnvironmentType.TESTNET,
+            network: test_network,
             rpcUrl
         }
     })
@@ -140,13 +141,13 @@ export async function generateProof() : Promise<SignInfo> {
     const USER_CONTEXT_NAME = userVerida.CONTEXT_NAME
     const userKeyring = await userAccount.keyring(USER_CONTEXT_NAME)
 
-    const didClient = await signAccount.getDidClient()
+    const didClient = await signAccount.getDIDClient()
 
     const signerDoc = await didClient.get(signerDid)
-    const signerProof = signerDoc.locateContextProof(SIGN_CONTEXT_NAME)
+    const signerProof = signerDoc.locateContextProof(SIGN_CONTEXT_NAME, test_network)
 
     const userDoc = await didClient.get(userDid)
-    const userProof = userDoc.locateContextProof(USER_CONTEXT_NAME)
+    const userProof = userDoc.locateContextProof(USER_CONTEXT_NAME, test_network)
 
     return {
         signKeyring,

@@ -7,7 +7,7 @@ import {
 } from './utils'
 import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SERVER_URL = getServerURL("VeridaDIDRegistry")
+const SERVER_URL = getServerURL("didRegistry")
 
 let server
 
@@ -151,7 +151,7 @@ const callSetControllerAPI = async (did: string, controller: string, signKey: st
 describe("DIDRegistry Test", function() {
     before(async () =>{
         this.timeout(100000)
-        server = await getAxios("VeridaDIDRegistry")
+        server = await getAxios("didRegistry")
     })
 
     describe("Register", () => {

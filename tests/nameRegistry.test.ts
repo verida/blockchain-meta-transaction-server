@@ -4,7 +4,7 @@ import EncryptionUtils from "@verida/encryption-utils";
 import { ethers, Wallet } from 'ethers'
 import { AUTH_HEADER, getAxios, getServerURL } from './serverConfig'
 
-const SERVER_URL = getServerURL("NameRegistry")
+const SERVER_URL = getServerURL("nameRegistry")
 
 let server
 
@@ -112,7 +112,7 @@ const getRegisterSignature = async (name: string, did: WalletInterface) => {
 describe("NameRegistry Tests", function() {
     before(async () =>{
         this.timeout(100000)
-        server = await getAxios("NameRegistry")
+        server = await getAxios("nameRegistry")
     })
 
     describe("Register()",async () => {
