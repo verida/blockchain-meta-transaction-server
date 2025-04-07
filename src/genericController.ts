@@ -28,6 +28,7 @@ const txSigner = new Wallet(privateKey, provider)
 
 const eip1559gasStationUrl = process.env.eip1559gasStationUrl ? process.env.eip1559gasStationUrl : undefined
 const eip1559Mode = process.env.eip1559Mode ? process.env.eip1559Mode : undefined
+const gasLimit = process.env.gasLimit ? process.env.gasLimit : undefined
 
 /**
  * Class that process incoming http requests
@@ -105,6 +106,10 @@ export default class GenericController {
                 if (eip1559gasStationUrl && eip1559Mode) {
                     const gasConfig = await getMaticFee(eip1559gasStationUrl, eip1559Mode);
                     finalParams.push(gasConfig)
+                }
+
+                if (gasLimit) {
+                    finalParams.gasLimit = gasLimit
                 }
 
                 const transaction = await contract.functions[abiMethod.name](...finalParams)                
